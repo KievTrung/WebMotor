@@ -59,8 +59,8 @@ public class UserUtils {
 
 	public int datHang( int id, String hinhThucThanhToan) {
 		int result = 0;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = session.getSession().createStoredProcedureCall("sp_tr_datHang");
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_datHang");
 			pc.registerParameter("id", int.class, ParameterMode.IN).bindValue(id);
 			pc.registerParameter("hinhThucThanhToan", String.class, ParameterMode.IN).bindValue(hinhThucThanhToan);
 			pc.registerParameter("result", int.class, ParameterMode.OUT);
@@ -105,11 +105,11 @@ public class UserUtils {
 		}
 		
 		Transaction tran = null;
-		try (CSession session = new CSession(sessionFactory.openSession())){
+		try (CSession csession = new CSession(sessionFactory.openSession())){
 			
-			tran = session.getSession().beginTransaction();
+			tran = csession.getSession().beginTransaction();
 			
-			Query q = session.getSession().createQuery(hql);
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("orderId", soHoaDon);
 			q.setParameter("pm", pm.toString());
 			q.setParameter("addr", orderInfo.getAddress());
@@ -125,8 +125,8 @@ public class UserUtils {
 	}
 	
 	public void updateStock(int soHoaDon) throws Exception{
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = session.getSession().createStoredProcedureCall("sp_tr_updateStock");
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_updateStock");
 			pc.registerParameter("soHoaDon", int.class, ParameterMode.IN).bindValue(soHoaDon);
 			pc.getOutputs();
 		}
@@ -137,8 +137,8 @@ public class UserUtils {
 	}
 		
 	public void restoreDonHang(int soHoaDon) throws Exception{
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = session.getSession().createStoredProcedureCall("sp_tr_restoreDonHang");
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_restoreDonHang");
 			pc.registerParameter("soHoaDon", int.class, ParameterMode.IN).bindValue(soHoaDon);
 			pc.getOutputs();
 		}
@@ -154,8 +154,8 @@ public class UserUtils {
 				+ " from GioHang gh inner join gh.id.xe.vehiclePictures vp"
 				+ " where gh.id.user.id = :id and vp.id.ten like '%_0.%'";
 		List<Object[]> list = null; 
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("id", id);
 			list = (List<Object[]>)q.list();			
 		}
@@ -173,8 +173,8 @@ public class UserUtils {
 	
 	public int setUpTaiKhoan( int flag, String login, String password, int phone, String email, String diaChi, boolean isAdmin, boolean isActive) {
 		int result = 0;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = session.getSession().createStoredProcedureCall("sp_tr_setUpTaiKhoan");
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_setUpTaiKhoan");
 			pc.registerParameter("login_name", String.class, ParameterMode.IN).bindValue(login);
 			pc.registerParameter("password", String.class, ParameterMode.IN).bindValue(password);
 			pc.registerParameter("phone", int.class, ParameterMode.IN).bindValue(phone);
@@ -194,8 +194,8 @@ public class UserUtils {
 	
 	public int setUpXe( int flag, String maXe, String tenXe, int giaXe, String loaiXe, String description, int soLuongTonKho, int indexMode) {
 		int result = 0;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = session.getSession().createStoredProcedureCall("sp_tr_setUpXe");
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_setUpXe");
 			pc.registerParameter("maXe", String.class, ParameterMode.IN).bindValue(maXe);
 			pc.registerParameter("tenXe", String.class, ParameterMode.IN).bindValue(tenXe);
 			pc.registerParameter("loaiXe", String.class, ParameterMode.IN).bindValue(loaiXe);
@@ -215,8 +215,8 @@ public class UserUtils {
 	
 	public int themGioHang( int id, String maXe, int soLuong) {
 		int result = 0;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = session.getSession().createStoredProcedureCall("sp_tr_themGioHang");
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_themGioHang");
 			pc.registerParameter("id", int.class, ParameterMode.IN).bindValue(id);
 			pc.registerParameter("maXe", String.class, ParameterMode.IN).bindValue(maXe);
 			pc.registerParameter("soLuong", int.class, ParameterMode.IN).bindValue(soLuong);
@@ -232,8 +232,8 @@ public class UserUtils {
 	public Long countCartItems( int id) {
 		String hql = "select sum(soLuong) from GioHang where id.user.id = :id group by id.user.id";
 		Long result = null;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("id", id);
 			result = (Long)q.uniqueResult();
 		}
@@ -243,9 +243,9 @@ public class UserUtils {
 	public void removeCartItems( String productId, int userId) {
 		String hql = "delete from GioHang where id.xe.maXe = :productId and id.user.id = :userId";
 		Transaction tran = null;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			tran = session.getSession().beginTransaction();
-			Query q = session.getSession().createQuery(hql);
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			tran = csession.getSession().beginTransaction();
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("productId", productId);
 			q.setParameter("userId", userId);
 			q.executeUpdate();
@@ -259,9 +259,9 @@ public class UserUtils {
 	public void removeCart( int userId) {
 		String hql = "delete from GioHang where id.user.id = :userId";
 		Transaction tran = null;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			tran = session.getSession().beginTransaction();
-			Query q = session.getSession().createQuery(hql);
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			tran = csession.getSession().beginTransaction();
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("userId", userId);
 		 	System.out.println("testing :" + q.executeUpdate());
 			tran.commit();
@@ -273,8 +273,8 @@ public class UserUtils {
 	
 	public int changeItemAmountInCart( int userId, String maXe, int soLuong) {
 		int result = 0;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = session.getSession().createStoredProcedureCall("sp_tr_thayDoiSoLuongItemTrongGioHang");
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_thayDoiSoLuongItemTrongGioHang");
 			pc.registerParameter("id", int.class, ParameterMode.IN).bindValue(userId);
 			pc.registerParameter("maXe", String.class, ParameterMode.IN).bindValue(maXe);
 			pc.registerParameter("soLuongYeuCau", int.class, ParameterMode.IN).bindValue(soLuong);
@@ -289,8 +289,8 @@ public class UserUtils {
 	
 	public int addVehiclePicture( String maXe, String name) {
 		int result = 0;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = session.getSession().createStoredProcedureCall("sp_tr_addVehiclePicture");
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_addVehiclePicture");
 			pc.registerParameter("maXe", String.class, ParameterMode.IN).bindValue(maXe);
 			pc.registerParameter("name", String.class, ParameterMode.IN).bindValue(name);
 			pc.registerParameter("result", int.class, ParameterMode.OUT);
@@ -304,8 +304,8 @@ public class UserUtils {
 	
 	public int changeLogin( int id, String newLogin) {
 		int result = 0;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = session.getSession().createStoredProcedureCall("sp_tr_changeLoginName");
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_changeLoginName");
 			pc.registerParameter("id", int.class, ParameterMode.IN).bindValue(id);
 			pc.registerParameter("newLogin", String.class, ParameterMode.IN).bindValue(newLogin);
 			pc.registerParameter("result", int.class, ParameterMode.OUT);
@@ -322,8 +322,8 @@ public class UserUtils {
 		
 		Account user = null;
 		
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("login", login);
 			user = (Account)q.uniqueResult();				
 		}
@@ -334,8 +334,8 @@ public class UserUtils {
 		
 		String hql = "from Account where loginName = :login and password = :pass";
 		Account user = null;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("login", login);
 			q.setParameter("pass", password);
 			user = (Account)q.uniqueResult();
@@ -346,8 +346,8 @@ public class UserUtils {
 	public Integer checkLogin( String login) {
 		String hql = "select id from Account where loginName = :login";
 		Integer id = null;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("login", login);
 			id = (Integer)q.uniqueResult();
 		}
@@ -359,8 +359,8 @@ public class UserUtils {
 		String hql = "select loginName from Account where email = :email";
 		
 		String login = null;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("email", email);
 			login = (String)q.uniqueResult();
 		}
@@ -372,8 +372,8 @@ public class UserUtils {
 		String hql = "select id from Account where phone = :phone";
 		
 		Integer id = null;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("phone", phone);
 			id = (Integer)q.uniqueResult();
 		}
@@ -391,8 +391,8 @@ public class UserUtils {
 		+ (vehicleType.equals("All") ? "" : ((keyword.equals("")) ? "where" : "and") + " loaiXe = :vehicleType");
 	
 		long result = 0;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			if(!keyword.equals(""))
 				q.setParameter("keyword", keyword);
 			if(!vehicleType.equals("All"))
@@ -433,8 +433,8 @@ public class UserUtils {
 					+ sortType;
 		
 		List<Object[]> list = null;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			if(!keyword.equals(""))
 				q.setParameter("keyword", keyword);
 			if(!vehicleType.equals("All"))
@@ -473,11 +473,12 @@ public class UserUtils {
 		return page;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public List<String> getLoaiXe(){
 		String hql = "select distinct loaiXe from ChiTietXe ";
 		List<String> list = null;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			list = (List<String>)q.list();			
 			list.add("All");
 		}
@@ -489,8 +490,8 @@ public class UserUtils {
 				+ " from ChiTietXe ctx inner join ctx.vehiclePictures vp "
 				+ " where ctx.maXe = :maXe and vp.id.ten like '%_1.%'";
 		Object[] item = null;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("maXe", maXe);
 			item = (Object[])q.uniqueResult();
 		}
@@ -512,8 +513,8 @@ public class UserUtils {
 				+ " and vp.id.ten like '%_0.%'";
 		
 		List<Object[]> arr = null;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("loaiXe", loaiXe);
 			q.setParameter("maXeExclude", maXeExclude);
 			q.setMaxResults(4);
@@ -533,8 +534,8 @@ public class UserUtils {
 				+ " from VehiclePictures vp "
 				+ " where vp.id.xe.maXe = :maXe order by vp.id.ten asc ";
 		List<String> list = null;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("maXe", maXe);
 			q.setMaxResults(4);
 			q.setFirstResult(1);
@@ -545,8 +546,8 @@ public class UserUtils {
 	
 	public int taoDonHang( int userId, String paymentMethod) {
 		int result = -1;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = session.getSession().createStoredProcedureCall("sp_tr_taoDonHang");
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_taoDonHang");
 			pc.registerParameter("id", int.class, ParameterMode.IN).bindValue(userId);
 			pc.registerParameter("hinhThucThanhToan", String.class, ParameterMode.IN).bindValue(paymentMethod);
 			pc.registerParameter("result", int.class, ParameterMode.OUT);
@@ -568,8 +569,8 @@ public class UserUtils {
 				+ " where dh.soHoaDon = :orderId and vp.id.ten like '%_0.%'";
 		
 		List<Object[]> list = null;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("orderId", orderId);
 			list = (List<Object[]>)q.list();	
 		}
@@ -608,8 +609,8 @@ public class UserUtils {
 				+ " where dh.id.id = :userId";
 			
 		List<Object[]> list = null;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("userId", userId);
 			list = (List<Object[]>)q.list();	
 		}
@@ -648,8 +649,8 @@ public class UserUtils {
 				+ " where cthd.id.order.soHoaDon = :orderId and vp.id.ten like '%_0.%'";
 		
 		List<Object[]> list = null;
-		try(CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
+		try(CSession csession = new CSession(sessionFactory.openSession())){
+			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("orderId", orderId);
 			list = (List<Object[]>)q.list();	
 		}
@@ -670,13 +671,13 @@ public class UserUtils {
 		String hql2 = "delete from DonHang where soHoaDon  = :soHoaDon";
 
 		Transaction tran = null;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			tran = session.getSession().beginTransaction();
-			Query q1 = session.getSession().createQuery(hql1);
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			tran = csession.getSession().beginTransaction();
+			Query q1 = csession.getSession().createQuery(hql1);
 			q1.setParameter("soHoaDon", soHoaDon);
 			q1.executeUpdate();
 			
-			Query q2 = session.getSession().createQuery(hql2);
+			Query q2 = csession.getSession().createQuery(hql2);
 			q2.setParameter("soHoaDon", soHoaDon);
 			q2.executeUpdate();
 			tran.commit();
@@ -688,16 +689,11 @@ public class UserUtils {
 	
 	@SuppressWarnings("unchecked")
 	public List<List<Product>> getCategoryPicture() throws Exception{
-		String hql = "select ctx.loaiXe, vp.id.ten "
-				+ " from ChiTietXe ctx inner join ctx.vehiclePictures vp "
-				+ " where (ctx.indexMode = :indexMode1 or ctx.indexMode = :indexMode2) "
-				+ " and vp.id.ten like '%_0.%'";
 		List<Object[]> list = null;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
-			q.setParameter("indexMode1", IndexMode.BOTH.getValue()); 
-			q.setParameter("indexMode2", IndexMode.CATEGORY.getValue());
-			list = (List<Object[]>)q.list();
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			 ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_getCategoryPicture");
+			 Output output = pc.getOutputs().getCurrent();
+			 list = ((ResultSetOutput) output).getResultList();
 		}
 		
 		List<List<Product>> page = new ArrayList<List<Product>>();
@@ -728,18 +724,12 @@ public class UserUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<List<Product>> getFeatureProduct() throws Exception{
-		String hql = "select ctx.tenXe, ctx.giaXe, vp.id.ten, ctx.maXe"
-				+ " from ChiTietXe ctx inner join ctx.vehiclePictures vp "
-				+ " where (ctx.indexMode = :indexMode1 or ctx.indexMode = :indexMode2) "
-				+ " and vp.id.ten like '%_0.%'";
-		
+	public List<List<Product>> getFeatureProduct() throws Exception{	
 		List<Object[]> list = null;
-		try (CSession session = new CSession(sessionFactory.openSession())){
-			Query q = session.getSession().createQuery(hql);
-			q.setParameter("indexMode1", IndexMode.BOTH.getValue()); 
-			q.setParameter("indexMode2", IndexMode.FEATURE.getValue());
-			list = (List<Object[]>)q.list();			
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_getFeatureProduct");
+			Output output = pc.getOutputs().getCurrent();
+			list = ((ResultSetOutput) output).getResultList();
 		}
 
 		List<List<Product>> page = new ArrayList<List<Product>>();
@@ -769,5 +759,36 @@ public class UserUtils {
 			}
 		}
 		return page;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Product getSpecialProduct() {
+		
+		List<Object[]> list = null;
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_getSpecialProduct");
+			Output output = pc.getOutputs().getCurrent();
+			list = ((ResultSetOutput) output).getResultList();
+		}
+		return new Product(list.get(0)[0].toString(), 
+				list.get(0)[1].toString(), 
+				list.get(0)[2].toString(), 
+				list.get(0)[3].toString());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Product getIndexProduct() {
+		
+		List<Object[]> list = null;
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_getIndexProduct");
+			Output output = pc.getOutputs().getCurrent();
+			list = ((ResultSetOutput) output).getResultList();
+		}
+		System.out.println(list.get(0)[2].toString());
+		return new Product(list.get(0)[0].toString(), 
+				list.get(0)[1].toString(), 
+				list.get(0)[2].toString(), 
+				list.get(0)[3].toString());
 	}
 }

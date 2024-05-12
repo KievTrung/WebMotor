@@ -15,7 +15,7 @@
 </head>
 <body class="poppins-regular">
 	<!-- header -->
-	<div class="header" style="background-image: url(<c:url value="/resources/images/r1.jpg"/>)">
+	<div class="header" style="background-image: url(<c:url value="/resources/vehicles/${indexProduct.picture}"/>)">
 		<div class="container">
 			<div class="navbar">
 				<div>
@@ -35,10 +35,10 @@
 			</div>
 			<div class="row">
 				<div class="col-2">
-					<div class="box">
-						<h2>r1</h2>
-						<h3>Fastest of its kind</h3>
-						<a href="" class="btn">Explore now &#10146;</a>
+					<div class="box" style="width: 250px">
+						<h2>${indexProduct.name}</h2>
+						<h3>${indexProduct.description}</h3>
+						<a href="productDetail?code=${indexProduct.code}" class="btn">Explore now &#10146;</a>
 					</div>
 				</div>
 			</div>
@@ -70,7 +70,7 @@
 				<c:forEach var="item" items="${list}">
 					<a href="productDetail?code=${item.code}">
 						<div class="col-4 feature">
-								<img src="<c:url value="/resources/vehicles/${item.picture}"/>" alt="">
+								<img src="<c:url value="/resources/vehicles/${item.picture}"/>">
 							${item.name}
 							<p><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price * 1000}"/></p>
 						</div>
@@ -82,20 +82,19 @@
 	<!-- offer -->
 	<div class="offer">
 		<div class="small-container">
+			<h2 class="title_">Special offer</h2>
 			<div class="row">
 				<div class="col-2">
 					<div class="image-border">
-						<img src="images/r1.jpg" class="offer-image">
+						<img src="<c:url value="/resources/vehicles/${specialProduct.picture}"/>" class="offer-image">
 					</div>
 				</div>
 				<div class="col-2">
-					<p>Something special</p>
-					<h1>r1</h1>
-					<small> Lorem ipsum dolor sit amet consectetur adipisicing
-						elit. Ducimus ex dignissimos ad fugit reiciendis eos facilis
-						maxime nobis. Cumque et quae inventore error ullam earum illum
-						sint vel. Unde, modi. <br>
-					</small> <a class="btn">Buy now &#10146;</a>
+					<h1>${specialProduct.name}</h1>
+					<p style="font-weight: 600;"> 
+						${specialProduct.description}
+					</p> 
+					<a class="btn" href="productDetail?code=${specialProduct.code}">Explore now &#10146;</a>
 				</div>
 			</div>
 		</div>
@@ -121,19 +120,19 @@
 		<div class="small-container">
 			<div class="row">
 				<div class="col-5">
-					<img src="images/brand-1.jpg">
+					<img src="<c:url value="/resources/images/brand0.jpg"/>">
 				</div>
 				<div class="col-5">
-					<img src="images/brand-1.jpg">
+					<img src="<c:url value="/resources/images/brand1.jpg"/>">
 				</div>
 				<div class="col-5">
-					<img src="images/brand-1.jpg">
+					<img src="<c:url value="/resources/images/brand2.jpg"/>">
 				</div>
 				<div class="col-5">
-					<img src="images/brand-1.jpg">
+					<img src="<c:url value="/resources/images/brand3.jpg"/>">
 				</div>
 				<div class="col-5">
-					<img src="images/brand-1.jpg">
+					<img src="<c:url value="/resources/images/brand4.jpg"/>">
 				</div>
 			</div>
 		</div>
@@ -145,8 +144,8 @@
 					<h3>Dowload our app</h3>
 					<p>Dowload app for android and mobile phone</p>
 					<div class="app-logo">
-						<img src="images/app-store.png"> <img
-							src="images/play-store.png">
+						<img src="<c:url value="/resources/images/play-store.png"/>">
+						<img src="<c:url value="/resources/images/app-store.png"/>">
 					</div>
 				</div>
 				<div class="footer-col-2">

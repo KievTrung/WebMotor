@@ -1,4 +1,4 @@
-.category{
+		.category{
 			font-size: 20px;
 			transition: 0.5s;
 		}
@@ -10,4 +10,26 @@
 		.feature:hover{
 			background-color: gray;
 			color: white;
+		}
+		.offer-image{
+			box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;
+		}
+		.title_{
+			text-align: center;
+			margin: 0 auto 0px;
+			position: relative;
+			padding-top: 30px;
+			line-height: 60px;
+			color: black;
+		}
+		.title_:after{
+			content: '';
+			background:black;
+			width: 80px;
+			height: 5px;
+			border-radius: 5px;
+			position: absolute;
+			bottom: 0;
+			left: 50%;
+			transform: translateX(-50%);
 		}
