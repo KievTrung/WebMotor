@@ -1,0 +1,13 @@
+.category{
+			font-size: 20px;
+			transition: 0.5s;
+		}
+		.category:hover{
+			background-color: gray;
+			font-size: 50px;
+			color: white;
+		}
+		.feature:hover{
+			background-color: gray;
+			color: white;
+		}
