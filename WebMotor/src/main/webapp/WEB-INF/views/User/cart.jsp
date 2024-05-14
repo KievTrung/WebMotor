@@ -117,8 +117,8 @@
 						<h3>Dowload our app</h3>
 						<p>Dowload app for android and mobile phone</p>
 						<div class="app-logo">
-							<img src="images/app-store.png">
-							<img src="images/play-store.png">
+							<img src="<c:url value="/resources/images/play-store.png"/>">
+							<img src="<c:url value="/resources/images/app-store.png"/>">
 						</div>
 					</div>
 					<div class="footer-col-2">

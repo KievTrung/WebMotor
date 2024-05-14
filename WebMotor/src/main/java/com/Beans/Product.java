@@ -25,6 +25,14 @@ public class Product {
 		this.price = price;
 		this.picture = picture;
 	}
+	
+	public Product(String name, String description, String picture, String code) {
+		super();
+		this.name = name;
+		this.description = description;
+		this.picture = picture;
+		this.code = code;
+	}
 
 	public Product(String name, Integer price, String picture, String code) {
 		super();

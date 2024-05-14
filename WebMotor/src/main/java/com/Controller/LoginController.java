@@ -44,6 +44,8 @@ public class LoginController {
 	public String index(ModelMap model) throws Exception{
 		model.addAttribute("categoryList", userUtils.getCategoryPicture());
 		model.addAttribute("featureList", userUtils.getFeatureProduct());
+		model.addAttribute("specialProduct", userUtils.getSpecialProduct());
+		model.addAttribute("indexProduct", userUtils.getIndexProduct());
 		return "index";
 	}		
 	

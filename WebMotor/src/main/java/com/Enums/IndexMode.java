@@ -4,7 +4,7 @@ public enum IndexMode {
 	NONE(0),
 	CATEGORY(1),
 	FEATURE(2),
-	BOTH(4);
+	SPECIAL(4);
 	
 	private int mode; 
 	

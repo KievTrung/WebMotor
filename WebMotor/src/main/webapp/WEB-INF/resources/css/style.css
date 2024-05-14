@@ -60,7 +60,6 @@ a{
 } 
 .col-2 .image-border img{
 	max-width: 100%;
-	border-radius: 20px;
 }
 .col-2 h1{
 	font-size: 50px;
@@ -149,7 +148,8 @@ h4 {
 	transform: translateY(-10px);
 }
 .offer{
-	background: radial-gradient(rgb(177, 172, 172), rgb(21, 21, 230));
+	background: rgb(126,125,125);
+	background: linear-gradient(266deg, rgba(126,125,125,0.9327060902485994) 41%, rgba(103,98,98,0) 78%);
 }
 .col-2 .image-border{
 	padding: 50px;
