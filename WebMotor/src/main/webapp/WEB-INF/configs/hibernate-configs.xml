@@ -13,6 +13,13 @@
 		p:url="jdbc:sqlserver://localhost:1433; Database=WebMotor; trustServerCertificate=true;"
 		p:username="sa" p:password="12">
 	</bean>
+	
+	<bean id="jdbc" class="com.Utils.JDBC">
+		<constructor-arg name="url" value="jdbc:sqlserver://localhost:1433; Database=WebMotor; trustServerCertificate=true;"/>
+		<constructor-arg name="username" value="sa"/>
+		<constructor-arg name="password" value="12"/>
+	</bean>
+	
 	<!-- Cấu hình Hibernate -->
 	<bean id="sessionFactory"
 		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
@@ -31,4 +38,5 @@
 		class="org.springframework.orm.hibernate4.HibernateTransactionManager"
 		p:sessionFactory-ref="sessionFactory" />
 	<tx:annotation-driven transaction-manager="transactionManager" />
+	
 </beans>

@@ -1,13 +1,20 @@
-package com.Beans;
+package com.Auxiliaries;
+
+import java.util.List;
 
 public class Product {
+	
 	private String code;
+	private String picture = null;
+	private List<String>pics;
+	private boolean isNew = true;
+	
 	private String name;
-	private Integer price;
-	private String picture;
+	private Integer price = null;
+	private Integer amount;
 	private String description;
 	private String type;
-	private Integer amount;
+	private String active;
 	
 	public Product() {
 		super();
@@ -34,7 +41,7 @@ public class Product {
 		this.code = code;
 	}
 
-	public Product(String name, Integer price, String picture, String code) {
+	public Product(String code, String name, Integer price, String picture) {
 		super();
 		this.name = name;
 		this.price = price;
@@ -71,12 +78,37 @@ public class Product {
 		this.code = code;
 	}
 	
-	public Integer getamount() {
+	
+	public String getActive() {
+		return active;
+	}
+
+	public void setActive(String active) {
+		this.active = active;
+	}
+
+	public Integer getAmount() {
 		return amount;
 	}
 
-	public void setamount(Integer amount) {
+	public void setAmount(Integer amount) {
 		this.amount = amount;
+	}
+
+	public boolean isNew() {
+		return isNew;
+	}
+
+	public void setIsNew(boolean isNew) {
+		this.isNew = isNew;
+	}
+	
+	public List<String> getPics() {
+		return pics;
+	}
+
+	public void setPics(List<String> pics) {
+		this.pics = pics;
 	}
 
 	public String getType() {
@@ -125,8 +157,8 @@ public class Product {
 
 	@Override
 	public String toString() {
-		return "Product [name=" + name + ", price=" + price + ", picture=" + picture + ", amount=" + amount + "]";
+		return "Product [code=" + code + ", picture=" + picture + ", pics=" + pics + ", isNew=" + isNew + ", name="
+				+ name + ", price=" + price + ", amount=" + amount + ", description=" + description + ", type=" + type
+				+ ", active=" + active + "]";
 	}
-
-	
 }

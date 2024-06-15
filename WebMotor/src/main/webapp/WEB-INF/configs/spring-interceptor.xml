@@ -10,8 +10,8 @@
 		<mvc:interceptor>
 			<mvc:mapping path="/cart" />
 			<mvc:mapping path="/profile" />
-			<mvc:mapping path="/addCart" />			
-			<bean class="com.Interceptors.LoginInterceptor" />
+			<mvc:mapping path="/addCart" />		
+			<bean class="com.Interceptors.UserInterceptor" />
 		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/index" />
@@ -22,5 +22,9 @@
 			<mvc:mapping path="/history" />
 			<bean class="com.Interceptors.ItemsTrackingInterceptor" />
 		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/admin/*"/>	
+			<bean class="com.Interceptors.AdminInterceptor" />
+		</mvc:interceptor >
 	</mvc:interceptors>
 </beans>

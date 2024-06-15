@@ -17,7 +17,7 @@ public class Account {
 	private String password;
 	
 	@Column(nullable=false)
-	private int phone;
+	private Integer phone;
 	
 	private String email;
 	
@@ -34,6 +34,9 @@ public class Account {
 	
 	@OneToMany(mappedBy="id", cascade= {CascadeType.ALL}, fetch=FetchType.LAZY)
 	private Set<DonHang> donHangs;
+
+	@OneToMany(mappedBy="id", cascade= {CascadeType.ALL}, fetch=FetchType.LAZY)
+	private Set<NhapHang> nhapHangs;
 	
 	public Account() {
 		super();
@@ -80,10 +83,10 @@ public class Account {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	public int getPhone() {
+	public Integer getPhone() {
 		return phone;
 	}
-	public void setPhone(int phone) {
+	public void setPhone(Integer phone) {
 		this.phone = phone;
 	}
 	public String getEmail() {

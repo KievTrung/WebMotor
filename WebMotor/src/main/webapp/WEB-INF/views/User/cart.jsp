@@ -7,13 +7,13 @@
 		<meta charset="UTF-8">
 		<title>My cart</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link rel="preconnect" href="https://fonts.gstatic.com" >
 		<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-		<script src="https://kit.fontawesome.com/13e4082d8b.js" crossorigin="anonymous"></script>
+		<script src="https://kit.fontawesome.com/13e4082d8b.js" ></script>
 	<link href="<c:url value="/resources/css/style.css"/>" rel="stylesheet" >
 	<link href="<c:url value="/resources/css/cart.css"/>" rel="stylesheet" >	
 	</head>	
-	<body class="poppins-regular">
+	<body class="poppins-regular" onload="${msg}">
 		<div class="container" style="box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.1);">
 			<div class="navbar">
 				<div>
@@ -21,8 +21,17 @@
 				</div>
 				<nav>
 					<ul>
-						<li><a href="index">Home</a></li>
-						<li><a href="product">Products</a></li>
+						<c:if test="${not account.isAdmin()}">
+							<li><a href="index">Home</a></li>
+							<li><a href="product">Products</a></li>
+						</c:if>
+						<c:if test="${account.isAdmin()}">
+							<li><a href="admin/index">Home</a></li>
+							<li><a href="admin/user">Users</a></li>
+							<li><a href="product">Products</a></li>
+							<li><a href="admin/bill">Imports/Exports</a></li>
+						</c:if>		
+						
 						<li><a href="profile">${empty account ? "Account" : account.loginName}</a></li>
 					</ul>
 				</nav>
@@ -39,7 +48,7 @@
                 </tr>
                 <c:set var="subTotal" value="0"/>
                 <c:forEach var="item" items="${cartItems}">
-                	<c:set var="subTotal" value="${subTotal + item.amount * item.price * 1000}"/>
+                	<c:set var="subTotal" value="${subTotal + item.amount * item.price }"/>
 	                <tr>
 	                    <td>
 	                        <div class="cart-info">
@@ -47,10 +56,12 @@
 	                            <div>
 	                                <p>${item.name}</p>
 	                                <small>
-	                                	Price: <fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price * 1000}"/>
+	                                	Price: <fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price }"/>
 	                                </small>
 	                                <br>
-	                                <a href="remove?productId=${item.code}">Remove</a>
+	                                <c:if test="${not account.isAdmin()}">
+		                                <a href="remove?productId=${item.code}">Remove</a>
+	                                </c:if>
 	                            </div>
 	                        </div>
 	                    </td>
@@ -58,21 +69,26 @@
 	                    	<c:if test="${item.code eq itemError}">	                    	
 			                    <p style="color: red; font-size: 14px;">${errorMsg}</p>
 	                    	</c:if>
-	                        <form action="changeAmount?itemCode=${item.code}" method="post">
-	                            <input style="width: 20%; font-size: 17px;"
-	                            value="${item.amount}"
-	                            name="amount"
-	                            type="number" 
-	                            min="1" 
-	                            onkeypress="return (event.charCode == 13 || event.charCode != 8 && event.charCode == 0 || (event.charCode >= 48 && event.charCode <= 57))">
-	                        </form>
+	                    	<c:if test="${not account.isAdmin()}">
+		                        <form action="changeAmount?itemCode=${item.code}" method="post">
+		                            <input style="width: 20%; font-size: 17px;"
+		                            value="${item.amount}"
+		                            name="amount"
+		                            type="number" 
+		                            min="1" 
+		                            onkeypress="return (event.charCode == 13 || event.charCode != 8 && event.charCode == 0 || (event.charCode >= 48 && event.charCode <= 57))">
+		                        </form>
+	                    	</c:if>
+	                    	<c:if test="${account.isAdmin()}">
+		                        <h3>${item.amount}</h3>
+	                    	</c:if>
 	                    </td>
 	                    <td>
-	                    	<fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.amount * item.price * 1000}"/>
+	                    	<fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.amount * item.price }"/>
 	                    	<br>
 	                    	<p>
-	                    		SubTotal + <fmt:formatNumber type="percent" value="${vat}"/> VAT:
-	                    		<fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.amount * item.price * 1000 * (1 + vat)}"/>
+	                    		SubTotal + ${vat} % VAT:
+	                    		<fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.amount * item.price  * (1 + vat/100)}"/>
 	                    	</p>
 	                    </td>
 	                </tr>                	
@@ -89,22 +105,25 @@
                     <tr>
                         <td>VAT</td>
                         <td>
-                        	<fmt:formatNumber type="percent" value="${vat}"/>
+                        	${vat} %
                         </td>
                     </tr>
                     <tr  style="border-bottom: 3px solid black;">
                         <td>Total</td>
                         <td>
-                        	<fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${subTotal * (1 + vat)}"/>
+                        	<fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${subTotal * (1 + vat/100)}"/>
                         </td>
                     </tr>
+                    <c:if test=""></c:if>
                     <tr>
-                        <td colspan="${subTotal eq 0 ? 2 : 0}">
-                        	<a href="history" class="btn" style="width: 100%; border: 0px; text-align: center;">Order history</a>
-                        </td>
-                        <td style="display: ${subTotal eq 0 ? "none" : "block"};">
-                        	<a href="createOrder" class="btn" style="width: 100%; border: 0px; text-align: center;">Create order</a>
-                        </td>
+                    	<c:if test="${not account.isAdmin()}">							
+	                        <td colspan="${subTotal eq 0 ? 2 : 0}">
+	                        	<a href="history" class="btn" style="width: 100%; border: 0px; text-align: center;">Order history</a>
+	                        </td>
+	                        <td style="display: ${subTotal eq 0 ? 'none' : 'block'};">
+	                        	<a href="createOrder" class="btn" style="width: 100%; border: 0px; text-align: center;">Create order</a>
+	                        </td>
+						</c:if>
                     </tr>
                 </table>
             </div>

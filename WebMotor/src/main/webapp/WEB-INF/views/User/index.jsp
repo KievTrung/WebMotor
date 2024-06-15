@@ -7,9 +7,9 @@
 	<meta charset="UTF-8">
 	<title>WebMotor</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="preconnect" href="https://fonts.gstatic.com" >
 	<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-	<script src="https://kit.fontawesome.com/13e4082d8b.js" crossorigin="anonymous"></script>
+	<script src="https://kit.fontawesome.com/13e4082d8b.js" ></script>
 	<link href="<c:url value="/resources/css/style.css"/>" rel="stylesheet" >
 	<link href="<c:url value="/resources/css/index.css"/>" rel="stylesheet" >	
 </head>
@@ -23,15 +23,14 @@
 				</div>
 				<nav>
 					<ul>
-						<li><a href="index">Home</a></li>
 						<li><a href="product">Products</a></li>
-						<li><a href="<c:url value="/profile"/>">${empty account ? "Account" : account.loginName}</a></li>
+						<li><a href="profile">${empty account ? "Account" : account.loginName}</a></li>
 					</ul>
 				</nav>
 				<a href="cart?id=${account.id}">
 					<i class="fa-solid fa-cart-shopping" style="color: black;"></i>
 				</a>
-				<div class="items" style="visibility:${empty account || items eq 0 ? "collapse" : "visible"};">${items}</div>
+				<div class="items" style="visibility:${empty account || items eq 0 ? 'collapse' : 'visible'};">${items}</div>
 			</div>
 			<div class="row">
 				<div class="col-2">
@@ -48,36 +47,32 @@
 	<div class="categories">
 		<div class="small-container">
 			<h2 class="title">Categories</h2>
-			<c:forEach var="list" items="${categoryList}">
-				<div class="row">
-					<c:forEach var="item" items="${list}">
+			<div class="row">
+				<c:forEach var="item" items="${categoryList}">
+					<div class="col-4 category">
 						<a href="category?category=${item.type}">
-							<div class="col-4 category">
-									<img src="<c:url value="/resources/vehicles/${item.picture}"/>">
-								${item.type}
-							</div>
+							<img src="<c:url value="/resources/vehicles/${item.picture}"/>">
 						</a>
-					</c:forEach>
-				</div>
-			</c:forEach>
+						${item.type}
+					</div>
+				</c:forEach>
+			</div>			
 		</div>
 	</div>
 	<!-- product -->
 	<div class="small-container">
-		<h2 class="title">Feature Products</h2>
-		<c:forEach var="list" items="${featureList}">
-			<div class="row">
-				<c:forEach var="item" items="${list}">
+		<h2 class="title">Best Sellers</h2>
+		<div class="row">
+			<c:forEach var="item" items="${featureList}">	
+				<div class="col-4 feature">
 					<a href="productDetail?code=${item.code}">
-						<div class="col-4 feature">
-								<img src="<c:url value="/resources/vehicles/${item.picture}"/>">
-							${item.name}
-							<p><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price * 1000}"/></p>
-						</div>
+						<img src="<c:url value="/resources/vehicles/${item.picture}"/>">
 					</a>
-				</c:forEach>
-			</div>
-		</c:forEach>
+					${item.name}
+					<p><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price }"/></p>
+				</div>
+			</c:forEach>
+		</div>
 	</div>
 	<!-- offer -->
 	<div class="offer">
@@ -96,21 +91,6 @@
 					</p> 
 					<a class="btn" href="productDetail?code=${specialProduct.code}">Explore now &#10146;</a>
 				</div>
-			</div>
-		</div>
-	</div>
-	<!-- news -->
-	<div class="news">
-		<div class="small-container">
-			<h2 class="title">Best seller</h2>
-			<div class="row">
-				<c:forEach var="item" items="${bestSeller}">
-					<div class="col-4">
-						<img src="images/new-1.jpg">
-						<p>news heading</p>
-						<a class="btn">More info &#10146;</a>
-					</div>
-				</c:forEach>
 			</div>
 		</div>
 	</div>

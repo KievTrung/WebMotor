@@ -2,7 +2,7 @@ package com.Entity;
 
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.*;
 
@@ -30,13 +30,24 @@ public class DonHang {
 	
 	@Column(name="diaChi")
 	private String diaChi;
+	
+	private float vat;
 
-	@OneToMany(mappedBy="id.order", cascade= {CascadeType.ALL}, fetch=FetchType.LAZY)
-	private List<ChiTietDonHang> chiTietDonHangs;
+	@OneToMany(mappedBy="id.order", cascade= {CascadeType.ALL}, fetch=FetchType.EAGER)
+	private Set<ChiTietDonHang> chiTietDonHangs;
 	
 	public Account getId() {
 		return id;
 	}
+	
+	public float getVat() {
+		return vat;
+	}
+
+	public void setVat(float vat) {
+		this.vat = vat;
+	}
+
 	public String getDiaChi() {
 		return diaChi;
 	}
@@ -44,11 +55,11 @@ public class DonHang {
 	public void setDiaChi(String diaChi) {
 		this.diaChi = diaChi;
 	}
-	public List<ChiTietDonHang> getChiTietDonHangs() {
+	public Set<ChiTietDonHang> getChiTietDonHangs() {
 		return chiTietDonHangs;
 	}
 
-	public void ListChiTietDonHangs(List<ChiTietDonHang> chiTietDonHangs) {
+	public void SetChiTietDonHangs(Set<ChiTietDonHang> chiTietDonHangs) {
 		this.chiTietDonHangs = chiTietDonHangs;
 	}
 	
@@ -64,7 +75,7 @@ public class DonHang {
 		return soHoaDon;
 	}
 
-	public void ListSoHoaDon(int soHoaDon) {
+	public void SetSoHoaDon(int soHoaDon) {
 		this.soHoaDon = soHoaDon;
 	}
 
@@ -72,7 +83,7 @@ public class DonHang {
 		return ngayTao;
 	}
 
-	public void ListNgayTao(Date ngayTao) {
+	public void SetNgayTao(Date ngayTao) {
 		this.ngayTao = ngayTao;
 	}
 
@@ -80,7 +91,7 @@ public class DonHang {
 		return hinhThucThanhToan;
 	}
 
-	public void ListHinhThucThanhToan(String hinhThucThanhToan) {
+	public void SetHinhThucThanhToan(String hinhThucThanhToan) {
 		this.hinhThucThanhToan = hinhThucThanhToan;
 	}
 
@@ -88,14 +99,15 @@ public class DonHang {
 		return trangThaiThanhToan;
 	}
 
-	public void ListTrangThaiThanhToan(boolean trangThaiThanhToan) {
+	public void SetTrangThaiThanhToan(boolean trangThaiThanhToan) {
 		this.trangThaiThanhToan = trangThaiThanhToan;
 	}
 
 	@Override
 	public String toString() {
 		return "DonHang [soHoaDon=" + soHoaDon + ", ngayTao=" + ngayTao + ", id=" + id + ", hinhThucThanhToan="
-				+ hinhThucThanhToan + ", trangThaiThanhToan=" + trangThaiThanhToan + "]";
+				+ hinhThucThanhToan + ", trangThaiThanhToan=" + trangThaiThanhToan + ", additionInfo=" + additionInfo
+				+ ", diaChi=" + diaChi + ", vat=" + vat + ", chiTietDonHangs=" + chiTietDonHangs + "]";
 	}
 
 }

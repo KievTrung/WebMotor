@@ -7,9 +7,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profile Page</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-<script src="https://kit.fontawesome.com/13e4082d8b.js" crossorigin="anonymous"></script>
+<script src="https://kit.fontawesome.com/13e4082d8b.js" ></script>
 <link rel="stylesheet" href="<c:url value="/resources/css/style.css"/>" />
 <link rel="stylesheet" href="<c:url value="/resources/css/profile.css"/>" />
 </head>
@@ -21,14 +20,28 @@
 			</div>
 			<nav>
 				<ul>
-					<li><a href="index">Home</a></li>
-					<li><a href="product">Products</a></li>
+					<c:if test="${not account.isAdmin()}">
+						<li><a href="index">Home</a></li>
+					</c:if>
+					<c:if test="${account.isAdmin()}">
+						<li><a href="admin/index">Home</a></li>
+					</c:if>
+					
+						<li><a href="product">Products</a></li>
+						
+					<c:if test="${account.isAdmin()}">
+						<li><a href="">Users</a></li>
+						<li><a href="admin/bill">Imports/Exports</a></li>
+					</c:if>
+					
 				</ul>
 			</nav>
-			<a href="cart?id=${account.id}">
-				<i class="fa-solid fa-cart-shopping" style="color: black;"></i>
-			</a>
-			<div class="items" style="visibility:${empty account || items eq 0 ? "collapse" : "visible"};">${items}</div>
+			<c:if test="${not account.isAdmin()}">
+				<a href="cart?id=${account.id}">
+					<i class="fa-solid fa-cart-shopping" style="color: black;"></i>
+				</a>
+				<div class="items" style="visibility:${empty account || items eq 0 ? 'collapse' : 'visible'};">${items}</div>						
+			</c:if>
 		</div>
 	</div>
 	<div class="background" style="background-image: url(<c:url value="/resources/images/login.jpg"/>);">
