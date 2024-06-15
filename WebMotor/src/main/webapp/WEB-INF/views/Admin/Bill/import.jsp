@@ -126,7 +126,7 @@
 			<div class="row">
 	            <c:forEach var="item" items="${product.pics}">
 					<div class="col-4">
-						<img src="<c:url value="/resources/import/${item}"/>" 
+						<img src="<c:url value='/resources/upload/${item}'/>" 
 	                          onerror="this.onerror=null;this.src='<c:url value="/resources/vehicles/${item}"/>';"
 	                          onclick="confirmDelete('<c:url value="deleteImageFromImportProduct?name=${item}&productIndex=${productIndex}"/>', '${item}')"/>
 	                    <p>${item}</p>

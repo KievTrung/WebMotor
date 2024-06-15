@@ -102,6 +102,7 @@
 		                    <a class="btn" href="setSpecialOffer?id=${product.code}">Set special offer</a>
 	                    </c:if>
                     </form:form>
+                    
                     <div id="myModal1" class="modal">
                         <!-- Modal content -->
                         <div class="modal-content">
@@ -130,7 +131,7 @@
 			<div class="row">
 	            <c:forEach var="item" items="${productImages}">
 					<div class="col-4">
-						<img src="<c:url value="/resources/import/${item}"/>" 
+						<img src="<c:url value='/resources/upload/${item}'/>" 
 	                          onerror="this.onerror=null;this.src='<c:url value="/resources/vehicles/${item}"/>';"
 	                          onclick="confirmDelete('<c:url value="deleteImageFromEditProduct?image=${item}&productId=${product.code}&quantity=${productImages.size()}"/>', '${item}')"/>
 	                    <p>${item}</p>

@@ -92,10 +92,10 @@
 	                    <td rowspan="${bill.list.size()*2 + 1}" class="detail">
 	                    	<a href="userDetail?name=${bill.userName}">${bill.userName}</a>
 	                    </td>
-	                    <td rowspan="${bill.list.size()*2 + 1}">${bill.paymentMethod}</td>
+	                    <td rowspan="${bill.list.size()*2 + 1}">${bill.hinhThucThanhToan}</td>
 	                    <td rowspan="${bill.list.size()*2 + 1}">
 	                    	${bill.trangThaiThanhToan eq true ? "Paid": "Unpaid"}
-	                    	<c:if test="${bill.paymentMethod eq 'INPLACE' }">
+	                    	<c:if test="${bill.hinhThucThanhToan eq 'INPLACE' }">
 		                    	<a class="btn" href="changeState?id=${bill.soHoaDon}&val=${bill.trangThaiThanhToan}">
 		                    		${bill.trangThaiThanhToan eq true ? "Unpaid": "Paid"}
 		                    	</a>

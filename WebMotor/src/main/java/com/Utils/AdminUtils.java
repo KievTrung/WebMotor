@@ -257,8 +257,10 @@ public class AdminUtils {
 	}
 	
 	public boolean isUploadable(List<String> currentImages, MultipartFile[] newImages) {
-		if((currentImages.size() + (newImages[0].isEmpty() ? 0 : newImages.length)) > imagesUploadedLimit)
+		if((currentImages.size() + (newImages[0].isEmpty() ? 0 : newImages.length)) > imagesUploadedLimit) {
+			System.out.println("not uploadable");
 			return false;
+		}
 		return true;
 	}
 	
@@ -576,7 +578,6 @@ public class AdminUtils {
 			ps.setString(5, product.getCode());
 			ps.executeUpdate();
 		}
-		
 		//update new fetch images
 		try(PreparedStatement ps = con.prepareStatement("insert into vehiclePictures(maXe, ten) values(?,?)")){
 			for(String image : product.getPics()) {

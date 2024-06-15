@@ -180,27 +180,6 @@ public class UserUtils {
 		return result;
 	}
 	
-	public int setUpXe( int flag, String maXe, String tenXe, int giaXe, String loaiXe, String description, int soLuongTonKho, int indexMode) {
-		int result = 0;
-		try (CSession csession = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_setUpXe");
-			pc.registerParameter("maXe", String.class, ParameterMode.IN).bindValue(maXe);
-			pc.registerParameter("tenXe", String.class, ParameterMode.IN).bindValue(tenXe);
-			pc.registerParameter("loaiXe", String.class, ParameterMode.IN).bindValue(loaiXe);
-			pc.registerParameter("giaXe", int.class, ParameterMode.IN).bindValue(giaXe);
-			pc.registerParameter("descrip", String.class, ParameterMode.IN).bindValue(description);
-			pc.registerParameter("soLuongTonKho", int.class, ParameterMode.IN).bindValue(soLuongTonKho);
-			pc.registerParameter("indexMode", int.class, ParameterMode.IN).bindValue(indexMode);
-			pc.registerParameter("flag", int.class, ParameterMode.IN).bindValue(flag);
-			pc.registerParameter("result", int.class, ParameterMode.OUT);
-			result = (int)pc.getOutputs().getOutputParameterValue("result");
-		}
-		catch(Exception ex) {
-			ex.printStackTrace();
-		}
-		return result;
-	}
-	
 	public int themGioHang( int id, String maXe, int soLuong) {
 		int result = 0;
 		try (CSession csession = new CSession(sessionFactory.openSession())){

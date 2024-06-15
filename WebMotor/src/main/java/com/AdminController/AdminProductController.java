@@ -79,22 +79,17 @@ public class AdminProductController {
 		boolean errorFlag = false;
 
 		if(product.getName().equals("")) {
-			error.rejectValue("name", "2", "Invalid name");
-			errorFlag = true;
-		}
-		
-		if(product.getAmount() == null || product.getAmount() <= 0) {
-			error.rejectValue("amount", "2", "Invalid amount");
+			error.rejectValue("name", "1", "Invalid name");
 			errorFlag = true;
 		}
 		
 		if(product.getPrice() == null || product.getPrice() <= 0) {
-			error.rejectValue("price", "2", "Invalid price");
+			error.rejectValue("price", "4", "Invalid price");
 			errorFlag = true;
 		}
 		
 		if(product.getType().equals("") && category.equals("none")) {
-			error.rejectValue("type", "3", "Invalid category");
+			error.rejectValue("type", "5", "Invalid category");
 			errorFlag = true;
 		}
 		
@@ -107,18 +102,17 @@ public class AdminProductController {
 		
 		//check if new images uploadable
 		List<String> currentImages = product.getPics();
-		if(!newImages[0].isEmpty() && adminUtils.isUploadable(currentImages, newImages))
+		if(!newImages[0].isEmpty() && adminUtils.isUploadable(currentImages, newImages)) {
 			//insert new images to product
 			product.setPics(adminUtils.insertProductImages(currentImages, newImages));
-		else
-			rd.addFlashAttribute("msg", "alert('Failed to upload : only "+ adminUtils.getImagesUploadedLimit()  +" images is alow')");
+		}
 		
 		//update product new information to db
 		String maXe = product.getCode();
 		try(Connection con = adminUtils.getJdbc().getConnection()){
 			//disable auto commit
 			con.setAutoCommit(false);	
-			try {				
+			try {			
 				maXe = adminUtils.updateProduct(con, product, false);
 				con.commit();
 			}
