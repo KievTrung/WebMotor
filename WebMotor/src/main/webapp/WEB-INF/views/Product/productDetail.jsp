@@ -7,9 +7,9 @@
 		<meta charset="UTF-8">
 		<title>Products</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link rel="preconnect" href="https://fonts.gstatic.com" >
 		<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-		<script src="https://kit.fontawesome.com/13e4082d8b.js" crossorigin="anonymous"></script>
+		<script src="https://kit.fontawesome.com/13e4082d8b.js"></script>
 	<link rel="stylesheet" href="<c:url value="/resources/css/style.css"/>" />
 	<link rel="stylesheet" href="<c:url value="/resources/css/productDetail.css"/>" />	
 	</head>
@@ -29,7 +29,7 @@
 					<a href="cart?id=${account.id}">
 						<i class="fa-solid fa-cart-shopping" style="color: black;"></i>
 					</a>
-					<div class="items" style="visibility:${empty account || items eq 0 ? "collapse" : "visible"};">${items}</div>
+					<div class="items" style="visibility:${empty account || items eq 0 ? 'collapse' : 'visible'};">${items}</div>
 				</div>
 			</div>
 		<!----------------------------PRODUCT DETAIL-------------------------------------->
@@ -47,7 +47,7 @@
 				</div>
 				<div class="col-2">
 					<h1>${product.name}</h1>
-					<h4><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${product.price * 1000}"/></h4>
+					<h4><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${product.price}"/></h4>
 					<p style="color: red; font-size: 14px;">${errorMsg}</p>
 					<form id="form" action="addCart" method="post">
 						<input value="${account.id}" name="id" style="display: none;">
@@ -88,13 +88,13 @@
 		<div class="small-container">
 			<div class="row">
 				<c:forEach var="item" items="${relateList}">
-					<a href="productDetail?code=${item.code}">
-						<div class="col-4 feature">
-							<img src="<c:url value="/resources/vehicles/${item.picture}"/>" >
-							${item.name}
-							<p><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price * 1000}"/></p>
-						</div>
-					</a>
+					<div class="col-4 feature">
+						<a href="productDetail?code=${item.code}">
+								<img src="<c:url value="/resources/vehicles/${item.picture}"/>" >
+						</a>
+						${item.name}
+						<p><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price}"/></p>
+					</div>
 				</c:forEach>
 			</div>
 		</div>

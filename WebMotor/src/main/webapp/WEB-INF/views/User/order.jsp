@@ -10,7 +10,7 @@
     <title>Place order</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/13e4082d8b.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/13e4082d8b.js"></script>
     <link href="<c:url value="/resources/css/style.css"/>" rel="stylesheet" >
     <link href="<c:url value="/resources/css/order.css"/>" rel="stylesheet" >	
 </head>
@@ -39,22 +39,22 @@
                                 <tr>
                                     <td>Order id:</td>
                                     <td>:</td>
-                                    <td>${donHang.orderId}</td>
+                                    <td>${donHang.soHoaDon}</td>
                                 </tr>
                         
                                 <tr>
                                     <td>Order date</td>
                                     <td>:</td>
-                                    <td><fmt:formatDate type="date" dateStyle="long" value="${donHang.date}" /></td>
+                                    <td><fmt:formatDate type="date" dateStyle="long" value="${donHang.ngayTao}" /></td>
                                 </tr>
                                 <tr>
                                     <td>Payment method</td>
                                     <td>:</td>
                                     <td>
                                         <select id="paymentMethod" onclick="enableVisa()" style="font-size: 14px;" name="paymentMethod">
-                                            <option value="NA" ${donHang.paymentMethod eq "NA" ? "selected" : ""}>N/A</option>
-                                            <option value="VISA" ${donHang.paymentMethod eq "VISA" ? "selected" : ""}>VISA</option>
-                                            <option value="INPLACE" ${donHang.paymentMethod eq "INPLACE" ? "selected" : ""}>At place</option>
+                                            <option value="NA" ${donHang.hinhThucThanhToan eq "NA" ? "selected" : ""}>N/A</option>
+                                            <option value="VISA" ${donHang.hinhThucThanhToan eq "VISA" ? "selected" : ""}>VISA</option>
+                                            <option value="INPLACE" ${donHang.hinhThucThanhToan eq "INPLACE" ? "selected" : ""}>At place</option>
                                         </select>
                                         <br>
                                         <div style="font-size: 14px; color: red;">${errorMsg}</div>
@@ -80,7 +80,8 @@
                                     	<form:input
                                         		path="cardNumber"
                                                 id="cardNumber"
-                                                placeholder="xxxx xxxx xxxx xxxx"/>
+                                                placeholder="xxxx xxxx xxxx xxxx"
+                                                onkeypress="return checkDigit(event)"/>
                                       	<br>
                                       	 <form:errors path="cardNumber" element="div" style="font-size: 14px; color: red;"/>
                                     </td>
@@ -103,7 +104,8 @@
 	                                        id="cvv"
 	                                        path="cvv" 
 	                                        maxlength="3"
-	                                        placeholder="cvv" />
+	                                        placeholder="cvv" 
+	                                        onkeypress="return checkDigit(event)"/>
 	                                    <br>
 	                                    <form:errors path="cvv" element="div" style="font-size: 14px; color: red;"/>
                                     </td>
@@ -152,23 +154,23 @@
                             </tr>
                             <c:set var="total" value="0"/>
                             <c:forEach var="item" items="${donHang.list}">
-                            	<c:set var="total" value="${total + item.price * item.amount * 1000 * (1 + vat)}"/>
+                            	<c:set var="total" value="${total + item.price * item.amount  * (1 + donHang.vat/100)}"/>
 	                            <tr>
 	                                <td>
 	                                    <img src="<c:url value="/resources/vehicles/${item.picture}"/>" >
 	                                    <p>${item.name}</p>
-	                                    <p><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price * 1000}"/></p>
+	                                    <p><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price }"/></p>
 	                                </td>
 	                                <td>${item.amount}</td>
-	                                <td><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price * item.amount * 1000}"/></td>
+	                                <td><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price * item.amount }"/></td>
 	                            </tr>  
 	                            <tr>
-	                                <th colspan="2">SubTotal + <fmt:formatNumber type="percent" value="${vat}"/> VAT</th>
-                                	<th ><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price * item.amount * 1000 * (1 + vat)}"/></th>
+	                                <th colspan="2">SubTotal + <fmt:formatNumber type="percent" value="${donHang.vat}"/> VAT</th>
+                                	<th ><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price * item.amount  * (1 + donHang.vat/100)}"/></th>
 	                            </tr>                          
                             </c:forEach>
                             <tr>
-                            	<th colspan="2">Total + <fmt:formatNumber type="percent" value="${vat}"/> VAT</th>
+                            	<th colspan="2">Total + <fmt:formatNumber type="percent" value="${donHang.vat}"/> VAT</th>
                                 <th><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${total}"/></th>
                             </tr>
                         </table>
@@ -232,6 +234,39 @@
 	            cardName.value="NULL";
 	            cvv.value = "000";
 	        }
+	    }
+	    
+	    function cc_format(value) {
+	        var v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
+	        var matches = v.match(/\d{4,16}/g);
+	        var match = matches && matches[0] || ''
+	        var parts = []
+
+	        for (i=0, len=match.length; i<len; i+=4) {
+	            parts.push(match.substring(i, i+4))
+	        }
+
+	        if (parts.length) {
+	            return parts.join(' ')
+	        } else {
+	            return value
+	        }
+	    }
+	    
+	    function checkDigit(event) {
+	        var code = (event.which) ? event.which : event.keyCode;
+
+	        if ((code < 48 || code > 57) && (code > 31)) {
+	            return false;
+	        }
+
+	        return true;
+	    }
+	    
+	    onload = function() {
+	    	  document.getElementById('cardNumber').oninput = function() {
+	    	    this.value = cc_format(this.value)
+	    	  }
 	    }
 	    
 	    function enableVisa(){

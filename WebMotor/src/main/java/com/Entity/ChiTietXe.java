@@ -24,8 +24,9 @@ public class ChiTietXe {
 	
 	@Column(nullable=false)
 	private int soLuongTonKho;
-	
-	private int indexMode;
+		
+	@Column(nullable=false)
+	private boolean isActive;
 	
 	@OneToMany(mappedBy="id.xe", cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
 	private Set<GioHang> gioHangs;
@@ -40,13 +41,14 @@ public class ChiTietXe {
 		super();
 	}
 	
-	public int getIndexMode() {
-		return indexMode;
+	public boolean isActive() {
+		return isActive;
 	}
 
-	public void setIndexMode(int indexMode) {
-		this.indexMode = indexMode;
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
 	}
+
 
 	public Set<VehiclePictures> getVehiclePictures() {
 		return vehiclePictures;

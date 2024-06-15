@@ -2,36 +2,33 @@ package com.Entity;
 
 import javax.persistence.*;
 
-
 @Entity
-@Table(name="chiTietDonHang")
-public class ChiTietDonHang {
+@Table(name="chiTietNhapHang")
+public class ChiTietNhapHang {
 	@EmbeddedId
-	private ChiTietDonHangId id;
+	ChiTietNhapHangId id;
 	
 	private int soLuong;
 	private int giaXe;
-	
-	public ChiTietDonHang() {
+
+	public ChiTietNhapHang() {
 		super();
 	}
-	
+
 	public int getGiaXe() {
 		return giaXe;
 	}
-
 	public void setGiaXe(int giaXe) {
 		this.giaXe = giaXe;
 	}
-
-	public ChiTietDonHangId getId() {
+	public ChiTietNhapHangId getId() {
 		return id;
 	}
 
-	public void setId(ChiTietDonHangId id) {
+	public void setId(ChiTietNhapHangId id) {
 		this.id = id;
 	}
-	
+
 	public int getSoLuong() {
 		return soLuong;
 	}
@@ -42,7 +39,6 @@ public class ChiTietDonHang {
 
 	@Override
 	public String toString() {
-		return "ChiTietDonHang [id=" + id + ", soLuong=" + soLuong + "]";
+		return "ChiTietNhapHang [id=" + id + ", soLuong=" + soLuong + "]";
 	}
-
 }

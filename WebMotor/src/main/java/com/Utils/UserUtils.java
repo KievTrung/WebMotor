@@ -1,33 +1,28 @@
-package com.Utils;
+ package com.Utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.ParameterMode;
-import javax.servlet.http.HttpSession;
-
 
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.TransactionException;
 import org.hibernate.procedure.ProcedureCall;
-import org.hibernate.result.Output;
-import org.hibernate.result.ResultSetOutput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.Beans.Order;
-import com.Beans.OrderInformation;
-import com.Beans.Product;
+import com.Auxiliaries.Bill;
+import com.Auxiliaries.OrderInformation;
+import com.Auxiliaries.Product;
 import com.Entity.Account;
-import com.Enums.IndexMode;
+import com.Enums.AFlag;
 import com.Enums.PaymentMethod;
 import com.Enums.SortType;
-import com.Enums.VehicleType;
 
 @Component("userUtils")
 public class UserUtils {
@@ -35,26 +30,14 @@ public class UserUtils {
 	SessionFactory sessionFactory;
 	
 	private String email = "n21dccn004@student.ptithcm.edu.vn";
-	private double vat = 0.1;
-	
-	public UserUtils() {
-		super();
-	}
+	private int itemsPerPage = 8;
 
 	public String getEmail() {
 		return email;
 	}
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public double getVat() {
-		return vat;
-	}
-
-	public void setVat(double vat) {
-		this.vat = vat;
+	public int getItemsPerPage() {
+		return itemsPerPage;
 	}
 
 	public int datHang( int id, String hinhThucThanhToan) {
@@ -89,11 +72,6 @@ public class UserUtils {
 			additionInfo += "null";
 		}
 		
-		//update order
-		String hql = " update DonHang "
-				+ " set additionInfo = :ai, hinhThucThanhToan = :pm, diaChi = :addr, trangThaiThanhToan = 1 "
-				+ " where soHoaDon = :orderId";
-		
 		//check if there are still enough stocks in db and update them
 		try
 		{
@@ -108,6 +86,11 @@ public class UserUtils {
 		try (CSession csession = new CSession(sessionFactory.openSession())){
 			
 			tran = csession.getSession().beginTransaction();
+
+			//update order query
+			String hql = " update DonHang "
+					+ " set additionInfo = :ai, hinhThucThanhToan = :pm, diaChi = :addr, trangThaiThanhToan = 1 "
+					+ " where soHoaDon = :orderId";
 			
 			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("orderId", soHoaDon);
@@ -149,26 +132,31 @@ public class UserUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<Product> getCart( int id) {
-		String hql = "select gh.id.xe.maXe, gh.id.xe.tenXe, gh.id.xe.giaXe, gh.soLuong, vp.id.ten"
-				+ " from GioHang gh inner join gh.id.xe.vehiclePictures vp"
-				+ " where gh.id.user.id = :id and vp.id.ten like '%_0.%'";
-		List<Object[]> list = null; 
+	public List<Product> getCart( int userId) {
+		String hql = "select gh.id.xe.maXe, gh.id.xe.tenXe, gh.id.xe.giaXe, gh.soLuong, min(vp.id.ten)"
+				+ " from GioHang gh "
+				+ " inner join gh.id.xe.vehiclePictures vp "
+				+ " where gh.id.user.id = :id "
+				+ " group by gh.id.xe.maXe, gh.id.xe.tenXe, gh.id.xe.giaXe, gh.soLuong";
 		try (CSession csession = new CSession(sessionFactory.openSession())){
 			Query q = csession.getSession().createQuery(hql);
-			q.setParameter("id", id);
-			list = (List<Object[]>)q.list();			
+			q.setParameter("id", userId);
+			List<Object[]> list = (List<Object[]>)q.list();			
+
+			List<Product> cart = new ArrayList<Product>();
+			for(Object[] obj : list) {
+				Product product = new Product();
+				
+				product.setCode(obj[0].toString());
+				product.setName(obj[1].toString());
+				product.setPrice(Integer.parseInt(obj[2].toString()));
+				product.setAmount(Integer.parseInt(obj[3].toString()));
+				product.setPicture(obj[4].toString());
+				
+				cart.add(product);
+			}
+			return cart;
 		}
-		List<Product> cart = new ArrayList<Product>();
-		for(Object[] obj : list) {
-			Product product = new Product(obj[0].toString(),
-										obj[1].toString(), 
-										Integer.parseInt(obj[2].toString()),
-										Integer.parseInt(obj[3].toString()),
-										obj[4].toString());
-			cart.add(product);
-		}
-		return cart;
 	}
 	
 	public int setUpTaiKhoan( int flag, String login, String password, int phone, String email, String diaChi, boolean isAdmin, boolean isActive) {
@@ -182,27 +170,6 @@ public class UserUtils {
 			pc.registerParameter("diaChi", String.class, ParameterMode.IN).bindValue(diaChi);
 			pc.registerParameter("isAdmin", boolean.class, ParameterMode.IN).bindValue(isAdmin);
 			pc.registerParameter("isActive", boolean.class, ParameterMode.IN).bindValue(isActive);
-			pc.registerParameter("flag", int.class, ParameterMode.IN).bindValue(flag);
-			pc.registerParameter("result", int.class, ParameterMode.OUT);
-			result = (int)pc.getOutputs().getOutputParameterValue("result");
-		}
-		catch(Exception ex) {
-			ex.printStackTrace();
-		}
-		return result;
-	}
-	
-	public int setUpXe( int flag, String maXe, String tenXe, int giaXe, String loaiXe, String description, int soLuongTonKho, int indexMode) {
-		int result = 0;
-		try (CSession csession = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_setUpXe");
-			pc.registerParameter("maXe", String.class, ParameterMode.IN).bindValue(maXe);
-			pc.registerParameter("tenXe", String.class, ParameterMode.IN).bindValue(tenXe);
-			pc.registerParameter("loaiXe", String.class, ParameterMode.IN).bindValue(loaiXe);
-			pc.registerParameter("giaXe", int.class, ParameterMode.IN).bindValue(giaXe);
-			pc.registerParameter("descrip", String.class, ParameterMode.IN).bindValue(description);
-			pc.registerParameter("soLuongTonKho", int.class, ParameterMode.IN).bindValue(soLuongTonKho);
-			pc.registerParameter("indexMode", int.class, ParameterMode.IN).bindValue(indexMode);
 			pc.registerParameter("flag", int.class, ParameterMode.IN).bindValue(flag);
 			pc.registerParameter("result", int.class, ParameterMode.OUT);
 			result = (int)pc.getOutputs().getOutputParameterValue("result");
@@ -242,6 +209,7 @@ public class UserUtils {
 	
 	public void removeCartItems( String productId, int userId) {
 		String hql = "delete from GioHang where id.xe.maXe = :productId and id.user.id = :userId";
+
 		Transaction tran = null;
 		try (CSession csession = new CSession(sessionFactory.openSession())){
 			tran = csession.getSession().beginTransaction();
@@ -263,7 +231,7 @@ public class UserUtils {
 			tran = csession.getSession().beginTransaction();
 			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("userId", userId);
-		 	System.out.println("testing :" + q.executeUpdate());
+		 	q.executeUpdate();
 			tran.commit();
 		}catch(Exception ex) {
 			tran.rollback();
@@ -302,94 +270,72 @@ public class UserUtils {
 		return result;
 	}
 	
-	public int changeLogin( int id, String newLogin) {
-		int result = 0;
+	public void changeLogin( int id, String newLogin) throws Exception{
 		try (CSession csession = new CSession(sessionFactory.openSession())){
 			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_changeLoginName");
 			pc.registerParameter("id", int.class, ParameterMode.IN).bindValue(id);
 			pc.registerParameter("newLogin", String.class, ParameterMode.IN).bindValue(newLogin);
-			pc.registerParameter("result", int.class, ParameterMode.OUT);
-			result = (int)pc.getOutputs().getOutputParameterValue("result");
+			pc.getOutputs();
 		}
-		catch(Exception ex) {
-			ex.printStackTrace();
-		}
-		return result;
 	}
 	
-	public Account getUser( String login) {
-		String hql = "from Account where loginName = :login";
-		
-		Account user = null;
-		
+	public Account getUser( String login) {		
 		try(CSession csession = new CSession(sessionFactory.openSession())){
-			Query q = csession.getSession().createQuery(hql);
+			Query q = csession.getSession().createQuery("from Account where loginName = :login");
 			q.setParameter("login", login);
-			user = (Account)q.uniqueResult();				
+			return (Account)q.uniqueResult();				
 		}
-		return user;
 	}
 	
-	public Account checkUser( String login, String password) {
-		
-		String hql = "from Account where loginName = :login and password = :pass";
-		Account user = null;
+	public Account getUser( String login, String password) {
 		try(CSession csession = new CSession(sessionFactory.openSession())){
-			Query q = csession.getSession().createQuery(hql);
+			Query q = csession.getSession().createQuery("from Account where loginName = :login and password = :pass");
 			q.setParameter("login", login);
 			q.setParameter("pass", password);
-			user = (Account)q.uniqueResult();
+			return (Account)q.uniqueResult();
 		}
-		return user;
 	}
 		
 	public Integer checkLogin( String login) {
-		String hql = "select id from Account where loginName = :login";
-		Integer id = null;
 		try(CSession csession = new CSession(sessionFactory.openSession())){
-			Query q = csession.getSession().createQuery(hql);
+			Query q = csession.getSession().createQuery("select id from Account where loginName = :login");
 			q.setParameter("login", login);
-			id = (Integer)q.uniqueResult();
+			return (Integer)q.uniqueResult();
 		}
-		
-		return id;
 	}
 	
 	public String checkEmail( String email) {
-		String hql = "select loginName from Account where email = :email";
 		
-		String login = null;
 		try(CSession csession = new CSession(sessionFactory.openSession())){
-			Query q = csession.getSession().createQuery(hql);
+			Query q = csession.getSession().createQuery("select loginName from Account where email = :email");
 			q.setParameter("email", email);
-			login = (String)q.uniqueResult();
+			return (String)q.uniqueResult();
 		}
 		
-		return login;
 	}
 	
 	public Integer checkPhone( int phone) {
-		String hql = "select id from Account where phone = :phone";
 		
-		Integer id = null;
 		try(CSession csession = new CSession(sessionFactory.openSession())){
-			Query q = csession.getSession().createQuery(hql);
+			Query q = csession.getSession().createQuery("select id from Account where phone = :phone");
 			q.setParameter("phone", phone);
-			id = (Integer)q.uniqueResult();
+			return (Integer)q.uniqueResult();
 		}
 		
-		return id;
 	}
-	
-	private int numberOfColumn = 4;
-	private int itemsPerPage = 8;
 
-	public long getNumberOfPages(HttpSession s,  String vehicleType, String keyword) {
+	public long getNumberOfProducts(String vehicleType, String keyword, boolean isAdmin) {		
+		String hql = "select count(maXe) from ChiTietXe where ";
 		
-		String hql = "select count(maXe) from ChiTietXe " 
-		+ ((keyword.equals("")) ? keyword : "where tenXe like concat('%',:keyword,'%') ") 
-		+ (vehicleType.equals("All") ? "" : ((keyword.equals("")) ? "where" : "and") + " loaiXe = :vehicleType");
-	
+		hql += (isAdmin ? " 1=1" : " isActive = 1 ");
+		
+		if(!keyword.equals("") || !vehicleType.equals("All")) {
+			hql += " and ";
+			hql += (keyword.equals("") ? " 1=1" : " tenXe like concat('%',:keyword,'%') ");
+			hql += " and ";
+			hql += (vehicleType.equals("All") ? " 1=1 " : " loaiXe = :vehicleType ");			
+		}
+		
 		long result = 0;
 		try(CSession csession = new CSession(sessionFactory.openSession())){
 			Query q = csession.getSession().createQuery(hql);
@@ -399,38 +345,46 @@ public class UserUtils {
 				q.setParameter("vehicleType", vehicleType);
 			result = (long)q.uniqueResult();
 		}
-		
-		s.setAttribute("numberOfRecords", result);
-		
-		double pages = result / (double)itemsPerPage;
-		
+		return result;
+	}
+
+	public long getNumberOfItemPages(long numberOfItems, int itemsPerPages) {		
+		double pages = numberOfItems / (double)itemsPerPages;
 		return (pages - (long)pages) > 0 ? (long)(++pages) : ((long)pages == 0 ? (long)(++pages) : (long)pages);
 	}
 	
+	
 	@SuppressWarnings("unchecked")
-	public List<List<Product>> getChiTietXeList( int pageIndex, SortType sType, String vehicleType, String keyword) {
-		String sortType = "order by ";
+	public List<Product> getChiTietXeList( int pageIndex, SortType sType, String vehicleType, String keyword, boolean isAdmin) {
+		
+		String hql = "select ctx.maXe , ctx.tenXe, ctx.giaXe, min(vp.id.ten) "
+					+ " from ChiTietXe ctx inner join ctx.vehiclePictures vp where ";
+		
+		hql += (isAdmin ? " 1=1" : " isActive = 1 ");
+
+		if(isAdmin || !keyword.equals("") || !vehicleType.equals("All")) {
+			hql += " and ";
+			hql += (keyword.equals("") ? " 1=1" : " ctx.tenXe like concat('%',:keyword,'%') ");
+			hql += " and ";
+			hql += (vehicleType.equals("All") ? " 1=1 " : " ctx.loaiXe = :vehicleType ");			
+		}
+		
+		hql += " group by ctx.tenXe, ctx.giaXe, ctx.maXe ";
 		switch(sType) {
 		case LOW2HIGH:
-			sortType += "ctx.giaXe asc";
+			hql += " order by ctx.giaXe asc ";
 			break;
 		case A2Z:
-			sortType += "ctx.tenXe asc";
+			hql += " order by ctx.tenXe asc ";
 			break;
 		case Z2A:
-			sortType += "ctx.tenXe desc";
+			hql += " order by ctx.tenXe desc ";
 			break;
 		case HIGH2LOW:
 		default:
-			sortType += "ctx.giaXe desc";
+			hql += " order by ctx.giaXe desc ";
 		}
 		
-		String hql = "select ctx.tenXe, ctx.giaXe, vp.id.ten, ctx.maXe "
-					+ "from ChiTietXe ctx inner join ctx.vehiclePictures vp "
-					+ "where (vp.id.ten like '%_0.%' or vp.id.ten like '%_0.%') "
-					+ ((keyword.equals("")) ? keyword : " and ctx.tenXe like concat('%',:keyword,'%') ")
-					+ (vehicleType.equals("All") ? "" : " and ctx.loaiXe = :vehicleType ")
-					+ sortType;
 		
 		List<Object[]> list = null;
 		try(CSession csession = new CSession(sessionFactory.openSession())){
@@ -445,32 +399,17 @@ public class UserUtils {
 			
 			list = (List<Object[]>)q.list(); 
 		}
-		
-		List<List<Product>> page = new ArrayList<List<Product>>();
-		
-		List<Product> products = new ArrayList<Product>();
 				
-		int i=1, size = list.size();
-		
+		List<Product> products = new ArrayList<Product>();
+						
 		for(Object[] obj : list) 
 		{		
-			products.add(new Product(obj[0].toString(), Integer.parseInt(obj[1].toString()), obj[2].toString(), obj[3].toString()));
-			i++;
-			size--;
-				
-			if(size == 0) 
-			{
-				page.add(products);
-				break;
-			}
-			else if(i > numberOfColumn) 
-			{
-				page.add(products);
-				products = new ArrayList<Product>();
-				i = 1;
-			}
+			products.add(new Product(obj[0].toString(), 
+									obj[1].toString(), 
+									Integer.parseInt(obj[2].toString()), 
+									obj[3].toString()));
 		}
-		return page;
+		return products;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -506,26 +445,32 @@ public class UserUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<Product> getRelateProduct( String maXeExclude, String loaiXe){
-		String hql = "select ctx.tenXe, ctx.giaXe, vp.id.ten, ctx.maXe"
+	public List<Product> getRelateProduct( String maXe, String loaiXe){
+		String hql = "select ctx.maXe, ctx.tenXe, ctx.giaXe, min(vp.id.ten) "
 				+ " from ChiTietXe ctx inner join ctx.vehiclePictures vp "
-				+ " where ctx.loaiXe = :loaiXe and ctx.maXe != :maXeExclude "
-				+ " and vp.id.ten like '%_0.%'";
+				+ " where ctx.maXe != :maXe and loaiXe = :loaiXe and ctx.isActive = 1"
+				+ " group by ctx.maXe, ctx.tenXe, ctx.giaXe";
 		
-		List<Object[]> arr = null;
+		
+		List<Product> products = new ArrayList<Product>();
 		try(CSession csession = new CSession(sessionFactory.openSession())){
 			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("loaiXe", loaiXe);
-			q.setParameter("maXeExclude", maXeExclude);
-			q.setMaxResults(4);
-			arr = (List<Object[]>)q.list();	
+			q.setParameter("maXe", maXe);
+			q.setMaxResults(8);
+			List<Object[]> list = (List<Object[]>)q.list();	
+
+			for(Object[] obj : list) {
+				Product product = new Product();
+				product.setCode(obj[0].toString());
+				product.setName(obj[1].toString());
+				product.setPrice(Integer.parseInt(obj[2].toString()));
+				product.setPicture(obj[3].toString());
+				
+				products.add(product);
+			}
 		}
-		
-		List<Product> list = new ArrayList<Product>();
-		for(Object[] obj : arr)
-			list.add(new Product(obj[0].toString(), Integer.parseInt(obj[1].toString()), obj[2].toString(), obj[3].toString()));
-			
-		return list;
+		return products;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -544,127 +489,116 @@ public class UserUtils {
 		return list;
 	}
 	
-	public int taoDonHang( int userId, String paymentMethod) {
-		int result = -1;
+	public int createExportBill(int userId, String paymentMethod) throws Exception{
 		try (CSession csession = new CSession(sessionFactory.openSession())){
 			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_taoDonHang");
 			pc.registerParameter("id", int.class, ParameterMode.IN).bindValue(userId);
 			pc.registerParameter("hinhThucThanhToan", String.class, ParameterMode.IN).bindValue(paymentMethod);
 			pc.registerParameter("result", int.class, ParameterMode.OUT);
-			result = (int)pc.getOutputs().getOutputParameterValue("result");
+			return (int)pc.getOutputs().getOutputParameterValue("result");
 		}
-		catch(Exception ex) {
-			ex.printStackTrace();
-		}
-		return result;
 	}
 	
+//	@SuppressWarnings("unchecked")
+//	public Bill getExportBill(int soHoaDon) throws ParseException {
+//		//get export Bill first
+//		String hql1 = "select soHoaDon, ngayTao, hinhThucThanhToan "
+//				+ " from DonHang "
+//				+ " where soHoaDon = :soHoaDon ";
+//		
+//		//get detail of export Bill
+//		String hql2 = "select ctx.tenXe, ctdh.giaXe, ctdh.soLuong, min(vp.id.ten) "
+//				+ " from ChiTietDonHang ctdh "
+//				+ " inner join ctdh.id.xe ctx "
+//				+ " inner join ctx.vehiclePictures vp "
+//				+ " where ctdh.id.order.soHoaDon = :soHoaDon "
+//				+ " group by ctx.tenXe, ctdh.giaXe, chdh.soLuong ";
+//		
+//		try(CSession csession = new CSession(sessionFactory.openSession())){
+//			Query q1 = csession.getSession().createQuery(hql1);
+//			q1.setParameter("orderId", soHoaDon);
+//			Object[] objs1 = (Object[])q1.uniqueResult();	
+//			
+//			Bill exportBill = new Bill();
+//			exportBill.setSoHoaDon(Integer.parseInt(objs1[0].toString()));
+//			exportBill.setNgayTao(new SimpleDateFormat("yyyy-MM-dd").parse(objs1[1].toString()));
+//			exportBill.setHinhThucThanhToan(PaymentMethod.valueOf(objs1[2].toString()));
+//
+//			
+//			Query q2 = csession.getSession().createQuery(hql2);
+//			q2.setParameter("orderId", soHoaDon);
+//			List<Object[]> objs2 = (List<Object[]>)q2.list();	
+//			
+//			List<Product> products = new ArrayList<Product>();
+//			for(Object[] obj : objs2) {
+//				
+//				Product product = new Product();
+//				product.setName(obj[0].toString());
+//				product.setPrice(Integer.parseInt(obj[1].toString()));
+//				product.setAmount(Integer.parseInt(obj[2].toString()));
+//				product.setPicture(obj[3].toString());
+//				products.add(product);
+//			}
+//			exportBill.setList(products);
+//			return exportBill;
+//		}		
+//	}
+	
 	@SuppressWarnings("unchecked")
-	public Order getOrder( int orderId) {
-		String hql = "select dh.soHoaDon, dh.ngayTao, dh.hinhThucThanhToan, ctx.tenXe, ctx.giaXe, ctdh.soLuong, vp.id.ten "
-				+ " from DonHang dh "
-				+ " inner join dh.chiTietDonHangs ctdh "
-				+ "	inner join ctdh.id.xe ctx "
-				+ " inner join ctx.vehiclePictures vp "
-				+ " where dh.soHoaDon = :orderId and vp.id.ten like '%_0.%'";
+	public List<Bill> getExportBillsBelongToUser(int userId) throws ParseException{
 		
-		List<Object[]> list = null;
+		String hql1 = "select soHoaDon, ngayTao, hinhThucThanhToan, trangThaiThanhToan, diaChi, vat"
+				+ " from DonHang dh "
+				+ " where id.id = :userId "
+				+ " order by soHoaDon desc";
+		
+		String hql2 = "select cthd.id.xe.tenXe, cthd.giaXe, cthd.soLuong, min(vp.id.ten) "
+				+ " from ChiTietDonHang cthd "
+				+ " inner join cthd.id.xe.vehiclePictures vp "
+				+ " where cthd.id.order.soHoaDon = :soHoaDon "
+				+ " group by cthd.id.xe.tenXe, cthd.giaXe, cthd.soLuong ";
+		
+		List<Bill> exportBills = new ArrayList<Bill>();
 		try(CSession csession = new CSession(sessionFactory.openSession())){
-			Query q = csession.getSession().createQuery(hql);
-			q.setParameter("orderId", orderId);
-			list = (List<Object[]>)q.list();	
-		}
-		
-		//get order info
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-		Object[] metaInfo = list.get(0);
-
-		Order order;
-		try {
-			order = new Order(Integer.parseInt(metaInfo[0].toString()), 
-									formatter.parse(metaInfo[1].toString()), 
-									metaInfo[2].toString());
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-			return null;
-		} catch (ParseException e) {
-			e.printStackTrace();
-			return null;
-		}
-		
-		//get detail order info
-		List<Product> products = new ArrayList<Product>();
-		for(Object[] obj : list) 
-			products.add(new Product(obj[3].toString(), Integer.parseInt(obj[4].toString()), Integer.parseInt(obj[5].toString()), obj[6].toString()));
-		
-		order.setList(products);
-		return order;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public List<Order> getListOrder( int userId){
-		
-		String hql = "select dh.soHoaDon, dh.ngayTao, dh.hinhThucThanhToan, dh.trangThaiThanhToan, dh.diaChi"
-				+ " from DonHang dh "
-				+ " where dh.id.id = :userId";
+			Query q1 = csession.getSession().createQuery(hql1);
+			Query q2 = csession.getSession().createQuery(hql2);
 			
-		List<Object[]> list = null;
-		try(CSession csession = new CSession(sessionFactory.openSession())){
-			Query q = csession.getSession().createQuery(hql);
-			q.setParameter("userId", userId);
-			list = (List<Object[]>)q.list();	
-		}
-		
-		List<Order> orders = new ArrayList<Order>();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-		
-		try {
-			for(Object[] obj : list) {
-				int orderId = Integer.parseInt(obj[0].toString());
-				Date date = formatter.parse(obj[1].toString());
-				String paymentMethod = obj[2].toString();
-				boolean state = Boolean.parseBoolean(obj[3].toString()); 
-				String address = (obj[4] == null) ? "" : obj[4].toString();
+			q1.setParameter("userId", userId);
+			List<Object[]> objs1 = (List<Object[]>)q1.list();	
+			
+			for(Object[] obj1 : objs1) {
+				//get export bills that belong to userId
+				Bill bill = new Bill();
 				
-				Order order = new Order(orderId, date, paymentMethod, state, address);
-				order.setList(getProductList( orderId));
-				orders.add(order);
+				bill.setSoHoaDon(Integer.parseInt(obj1[0].toString()));
+				bill.setNgayTao(new SimpleDateFormat("yyyy-MM-dd").parse(obj1[1].toString()));
+				bill.setHinhThucThanhToan(PaymentMethod.valueOf(obj1[2].toString()));
+				bill.setTrangThaiThanhToan(Boolean.parseBoolean(obj1[3].toString()));
+				bill.setAddress((obj1[4] == null) ? "" : obj1[4].toString());
+				bill.setVat(Float.parseFloat(obj1[5].toString()));
+				//get detail export bills 
+				q2.setParameter("soHoaDon", bill.getSoHoaDon());
+				List<Object[]> objs2 = (List<Object[]>)q2.list();	
+				
+				List<Product> products = new ArrayList<>();
+				for(Object[] obj2 : objs2) {
+					Product product = new Product();
+					
+					product.setName(obj2[0].toString());
+					product.setPrice(Integer.parseInt(obj2[1].toString()));
+					product.setAmount(Integer.parseInt(obj2[2].toString()));
+					product.setPicture(obj2[3].toString());
+					
+					products.add(product);
+				}
+				
+				bill.setList(products);
+				exportBills.add(bill);
 			}
-			
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-			return null;
-		} catch (ParseException e) {
-			e.printStackTrace();
-			return null;
 		}
-		
-		return orders;
+		return exportBills;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public List<Product> getProductList( int orderId){
-		String hql = "select cthd.id.xe.tenXe, cthd.id.xe.giaXe, cthd.soLuong, vp.id.ten"
-				+ " from ChiTietDonHang cthd inner join cthd.id.xe.vehiclePictures vp"
-				+ " where cthd.id.order.soHoaDon = :orderId and vp.id.ten like '%_0.%'";
-		
-		List<Object[]> list = null;
-		try(CSession csession = new CSession(sessionFactory.openSession())){
-			Query q = csession.getSession().createQuery(hql);
-			q.setParameter("orderId", orderId);
-			list = (List<Object[]>)q.list();	
-		}
-		
-		List<Product> products = new ArrayList<>();
-		for(Object[] obj : list) {
-			Product product = new Product(obj[0].toString(),
-										Integer.parseInt(obj[1].toString()),
-										Integer.parseInt(obj[2].toString()),
-										obj[3].toString());
-			products.add(product);
-		}
-		return products;
-	}
 	
 	public void deleteDonHang(int soHoaDon) {
 		String hql1 = "delete from ChiTietDonHang where id.order.soHoaDon  = :soHoaDon";
@@ -688,107 +622,136 @@ public class UserUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<List<Product>> getCategoryPicture() throws Exception{
-		List<Object[]> list = null;
-		try (CSession csession = new CSession(sessionFactory.openSession())){
-			 ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_getCategoryPicture");
-			 Output output = pc.getOutputs().getCurrent();
-			 list = ((ResultSetOutput) output).getResultList();
-		}
-		
-		List<List<Product>> page = new ArrayList<List<Product>>();
-		List<Product> products = new ArrayList<Product>();
-		
-		int i=1, size = list.size();
-		
-		for(Object[] obj : list) 
-		{		
-			products.add(new Product(obj[0].toString(), obj[1].toString()));
-			i++;
-			size--;
-				
-			if(size == 0) 
-			{
-				page.add(products);
-				break;
-			}
-			else if(i > numberOfColumn) 
-			{
-				page.add(products);
-				products = new ArrayList<Product>();
-				i = 1;
-			}
-		}
-		
-		return page;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public List<List<Product>> getFeatureProduct() throws Exception{	
-		List<Object[]> list = null;
-		try (CSession csession = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_getFeatureProduct");
-			Output output = pc.getOutputs().getCurrent();
-			list = ((ResultSetOutput) output).getResultList();
-		}
+	public List<Product> getIndexCategory() throws Exception{
+		String hql = "select ctx.loaiXe, min(vp.id.ten) "
+				+ "	from ChiTietXe ctx "
+				+ " inner join ctx.vehiclePictures vp "
+				+ " where ctx.isActive = 1 "
+				+ "	group by ctx.loaiXe ";
 
-		List<List<Product>> page = new ArrayList<List<Product>>();
 		List<Product> products = new ArrayList<Product>();
-		
-		int i=1, size = list.size();
-		
-		for(Object[] obj : list) 
-		{		
-			products.add(new Product(obj[0].toString(), 
-									Integer.parseInt(obj[1].toString()),
-									obj[2].toString(),
-									obj[3].toString()));
-			i++;
-			size--;
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			 Query q = csession.getSession().createQuery(hql);
+			 List<Object[]> list = (List<Object[]>)q.list();
+			 
+			 for(Object[] obj : list){
+				 //get vehicle that is active
+				 if(obj != null) {					 
+					 Product product = new Product();
+					 product.setType(obj[0].toString());
+					 product.setPicture(obj[1].toString());
+					 products.add(product);
+				 }
+			 }
+		}
+		return products;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Product> getTop8BestSellerProduct() throws Exception{
+		//get the most buy vehicles in the shop
+		String hql1 = "select ctdh.id.xe.maXe, sum(soLuong) as soLuong "
+					+ " from ChiTietDonHang ctdh "
+					+ " group by ctdh.id.xe.maXe order by soLuong desc ";
+		//get information of those best seller vehicles and must be active
+		String hql2 = "select ctx.maXe, ctx.tenXe, ctx.giaXe, min(vp.id.ten) "
+				+ " from ChiTietXe ctx inner join ctx.vehiclePictures vp "
+				+ " where ctx.maXe = :maXe and ctx.isActive = 1"
+				+ " group by ctx.maXe, ctx.tenXe, ctx.giaXe ";
+
+		List<Product> products = new ArrayList<Product>();
+		try (CSession csession = new CSession(sessionFactory.openSession())){
+			Query q1 = csession.getSession().createQuery(hql1);
+			Query q2 = csession.getSession().createQuery(hql2);
+			
+			//get only top 8 result in query 
+			q1.setMaxResults(8);
+			List<Object[]> list = (List<Object[]>)q1.list();
+			
+			for(Object[] obj : list) {
+				q2.setString("maXe", obj[0].toString());
+				Object[] obj_ = (Object[])q2.uniqueResult();
 				
-			if(size == 0) 
-			{
-				page.add(products);
-				break;
+				//get only vehicles that is active
+				if(obj_ != null) {					
+					Product product = new Product();
+					product.setCode(obj_[0].toString());
+					product.setName(obj_[1].toString());
+					product.setPrice(Integer.parseInt(obj_[2].toString()));
+					product.setPicture(obj_[3].toString());
+					products.add(product);
+				}
+				
 			}
-			else if(i > numberOfColumn) 
-			{
-				page.add(products);
-				products = new ArrayList<Product>();
-				i = 1;
-			}
+			return products;
 		}
-		return page;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Product getSpecialProduct() {
+	public Product getSpecialProduct(String maXe) {
+		String hql = "select ctx.maXe, ctx.tenXe, ctx.description, min(vp.id.ten) "
+				+ "	from ChiTietXe ctx inner join ctx.vehiclePictures vp "
+				+ ((maXe == null) ?  " where ctx.isActive = 1 " : " where ctx.maXe = :maXe ")
+				+ "	group by ctx.maXe, ctx.tenXe, ctx.description";
 		
-		List<Object[]> list = null;
 		try (CSession csession = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_getSpecialProduct");
-			Output output = pc.getOutputs().getCurrent();
-			list = ((ResultSetOutput) output).getResultList();
+			 Query q = csession.getSession().createQuery(hql);
+			 
+			 if(maXe == null) q.setMaxResults(1);
+			 else q.setString("maXe", maXe);
+			 
+			 Object[] objs = (Object[])q.uniqueResult();
+			 
+			 Product product = new Product();
+			 product.setCode(objs[0].toString());
+			 product.setName(objs[1].toString());
+			 product.setDescription(objs[2].toString());
+			 product.setPicture(objs[3].toString());
+			 
+			 return product;
 		}
-		return new Product(list.get(0)[0].toString(), 
-				list.get(0)[1].toString(), 
-				list.get(0)[2].toString(), 
-				list.get(0)[3].toString());
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Product getIndexProduct() {
+	public Product getIndexProduct(String maXe) {
+		String hql = "	select ctx.maXe, ctx.tenXe, ctx.description, min(vp.id.ten) "
+					+ "	from ChiTietXe ctx inner join ctx.vehiclePictures vp "
+					+ ((maXe == null) ?  " where ctx.isActive = 1 " : " where ctx.maXe = :maXe ")
+					+ "	group by ctx.maXe, ctx.tenXe, ctx.description";
 		
-		List<Object[]> list = null;
 		try (CSession csession = new CSession(sessionFactory.openSession())){
-			ProcedureCall pc = csession.getSession().createStoredProcedureCall("sp_tr_getIndexProduct");
-			Output output = pc.getOutputs().getCurrent();
-			list = ((ResultSetOutput) output).getResultList();
+			Query q = csession.getSession().createQuery(hql);
+			 
+			 if(maXe == null) 
+				 q.setMaxResults(1);
+			 else
+				 q.setString("maXe", maXe);
+			 
+			 Object[] objs = (Object[])q.uniqueResult();
+			 
+			 Product product = new Product();
+			 product.setCode(objs[0].toString());
+			 product.setName(objs[1].toString());
+			 product.setDescription(objs[2].toString());
+			 product.setPicture(objs[3].toString());
+			 
+			 return product;
 		}
-		System.out.println(list.get(0)[2].toString());
-		return new Product(list.get(0)[0].toString(), 
-				list.get(0)[1].toString(), 
-				list.get(0)[2].toString(), 
-				list.get(0)[3].toString());
+	}
+	
+	public boolean checkDate(int month, int year) {
+		
+		if(month == 0 || year == 0) return false;
+		
+		LocalDate current = LocalDate.now();
+		LocalDate date = LocalDate.of(year, month, 1);
+		
+		return (date.isBefore(current) || date.isEqual(current)) ? true : false;
+	}
+	
+	public int changeAccount(AFlag...flags) {
+		int flagCombo = 0;
+		for(AFlag flag : flags) {
+			flagCombo |= flag.getValue();
+		}
+		return flagCombo ;
 	}
 }

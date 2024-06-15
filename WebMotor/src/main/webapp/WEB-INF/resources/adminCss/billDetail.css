@@ -1,0 +1,35 @@
+.cart-page{
+	margin: 80px auto;
+}
+table{
+	width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+    border: 2px solid black;
+}
+th{
+	padding: 5px;
+	color: white;
+	background: black;
+	font-weight: normal;
+    border: 2px solid white;
+}
+td{
+	padding: 10px 5px;
+    border: 2px solid black;
+}
+td img{
+	width: 150px;
+	height: 150px;
+	margin-right: 10px; 
+}
+.detail{
+    transition: 0.5s;
+}
+.detail:hover{
+    color: white;
+    background-color: black;
+}
+.detail a:hover{
+    color:white;
+}
