@@ -77,12 +77,13 @@ public class OrderController {
 			int exportBillId = userUtils.createExportBill(userId, PaymentMethod.NA.toString());
 			//load export bill to user
 			s.setAttribute("donHang", adminUtils.getBill(exportBillId, "Export"));
+			//get user infor
+			model.addAttribute("metaInfo", new OrderInformation());
 		} catch (Exception e) {
 			e.printStackTrace();
 			ra.addFlashAttribute("msg", "alert('Error: "+ e.getMessage() +"')");
 			return "redirect:/cart?id=" + userId;
 		}
-		model.addAttribute("metaInfo", new OrderInformation());
 		return "User/order";
 	}
 	
@@ -129,13 +130,12 @@ public class OrderController {
 		else
 			s.removeAttribute("repayFlag");
 		
-		return "redirect:/history";
+		return "redirect:/history";	
 	}
 	
 	@RequestMapping("cancelOrder")
 	public String cancelOrder(HttpSession s){
 		//remove everything in cart
-		
 		if(s.getAttribute("repayFlag") == null)
 			userUtils.removeCart(((Account)s.getAttribute("account")).getId());
 		else

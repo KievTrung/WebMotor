@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.ParameterMode;
+import javax.servlet.ServletContext;
 
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
@@ -71,7 +72,6 @@ public class UserUtils {
 		case INPLACE: case NA:
 			additionInfo += "null";
 		}
-		
 		//check if there are still enough stocks in db and update them
 		try
 		{
@@ -81,7 +81,6 @@ public class UserUtils {
 			deleteDonHang(soHoaDon);
 			throw ex;
 		}
-		
 		Transaction tran = null;
 		try (CSession csession = new CSession(sessionFactory.openSession())){
 			
@@ -104,7 +103,6 @@ public class UserUtils {
 			tran.rollback();
 			throw ex;
 		}
-
 	}
 	
 	public void updateStock(int soHoaDon) throws Exception{
@@ -425,23 +423,26 @@ public class UserUtils {
 	}
 	
 	public Product getProduct( String maXe) {
-		String hql = "select ctx.tenXe, ctx.giaXe, ctx.description, ctx.loaiXe, ctx.soLuongTonKho, vp.id.ten "
+		String hql = "select ctx.tenXe, ctx.giaXe, ctx.description, ctx.loaiXe, ctx.soLuongTonKho, min(vp.id.ten) "
 				+ " from ChiTietXe ctx inner join ctx.vehiclePictures vp "
-				+ " where ctx.maXe = :maXe and vp.id.ten like '%_1.%'";
-		Object[] item = null;
+				+ " where ctx.maXe = :maXe "
+				+ " group by ctx.tenXe, ctx.giaXe, ctx.description, ctx.loaiXe, ctx.soLuongTonKho";
+		
 		try(CSession csession = new CSession(sessionFactory.openSession())){
 			Query q = csession.getSession().createQuery(hql);
 			q.setParameter("maXe", maXe);
-			item = (Object[])q.uniqueResult();
-		}
+			Object[] objs = (Object[])q.uniqueResult();
 
-		return new Product(item[0].toString(), 
-						Integer.parseInt(item[1].toString()), 
-						item[2].toString(), 
-						item[3].toString(), 
-						Integer.parseInt(item[4].toString()), 
-						item[5].toString(), 
-						maXe);
+			Product product = new Product();
+			product.setCode(maXe);
+			product.setName(objs[0].toString());
+			product.setPrice(Integer.parseInt(objs[1].toString()));
+			product.setDescription(objs[2].toString());
+			product.setType(objs[3].toString());
+			product.setAmount(Integer.parseInt(objs[4].toString()));
+			product.setPicture(objs[5].toString());
+			return product;
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -498,51 +499,6 @@ public class UserUtils {
 			return (int)pc.getOutputs().getOutputParameterValue("result");
 		}
 	}
-	
-//	@SuppressWarnings("unchecked")
-//	public Bill getExportBill(int soHoaDon) throws ParseException {
-//		//get export Bill first
-//		String hql1 = "select soHoaDon, ngayTao, hinhThucThanhToan "
-//				+ " from DonHang "
-//				+ " where soHoaDon = :soHoaDon ";
-//		
-//		//get detail of export Bill
-//		String hql2 = "select ctx.tenXe, ctdh.giaXe, ctdh.soLuong, min(vp.id.ten) "
-//				+ " from ChiTietDonHang ctdh "
-//				+ " inner join ctdh.id.xe ctx "
-//				+ " inner join ctx.vehiclePictures vp "
-//				+ " where ctdh.id.order.soHoaDon = :soHoaDon "
-//				+ " group by ctx.tenXe, ctdh.giaXe, chdh.soLuong ";
-//		
-//		try(CSession csession = new CSession(sessionFactory.openSession())){
-//			Query q1 = csession.getSession().createQuery(hql1);
-//			q1.setParameter("orderId", soHoaDon);
-//			Object[] objs1 = (Object[])q1.uniqueResult();	
-//			
-//			Bill exportBill = new Bill();
-//			exportBill.setSoHoaDon(Integer.parseInt(objs1[0].toString()));
-//			exportBill.setNgayTao(new SimpleDateFormat("yyyy-MM-dd").parse(objs1[1].toString()));
-//			exportBill.setHinhThucThanhToan(PaymentMethod.valueOf(objs1[2].toString()));
-//
-//			
-//			Query q2 = csession.getSession().createQuery(hql2);
-//			q2.setParameter("orderId", soHoaDon);
-//			List<Object[]> objs2 = (List<Object[]>)q2.list();	
-//			
-//			List<Product> products = new ArrayList<Product>();
-//			for(Object[] obj : objs2) {
-//				
-//				Product product = new Product();
-//				product.setName(obj[0].toString());
-//				product.setPrice(Integer.parseInt(obj[1].toString()));
-//				product.setAmount(Integer.parseInt(obj[2].toString()));
-//				product.setPicture(obj[3].toString());
-//				products.add(product);
-//			}
-//			exportBill.setList(products);
-//			return exportBill;
-//		}		
-//	}
 	
 	@SuppressWarnings("unchecked")
 	public List<Bill> getExportBillsBelongToUser(int userId) throws ParseException{
@@ -687,7 +643,7 @@ public class UserUtils {
 		}
 	}
 	
-	public Product getSpecialProduct(String maXe) {
+	public Product getSpecialProduct(String maXe, ServletContext context) {
 		String hql = "select ctx.maXe, ctx.tenXe, ctx.description, min(vp.id.ten) "
 				+ "	from ChiTietXe ctx inner join ctx.vehiclePictures vp "
 				+ ((maXe == null) ?  " where ctx.isActive = 1 " : " where ctx.maXe = :maXe ")
@@ -703,6 +659,7 @@ public class UserUtils {
 			 
 			 Product product = new Product();
 			 product.setCode(objs[0].toString());
+			 context.setAttribute("specialOffer", objs[0].toString());
 			 product.setName(objs[1].toString());
 			 product.setDescription(objs[2].toString());
 			 product.setPicture(objs[3].toString());
@@ -711,7 +668,7 @@ public class UserUtils {
 		}
 	}
 	
-	public Product getIndexProduct(String maXe) {
+	public Product getIndexProduct(String maXe, ServletContext context) {
 		String hql = "	select ctx.maXe, ctx.tenXe, ctx.description, min(vp.id.ten) "
 					+ "	from ChiTietXe ctx inner join ctx.vehiclePictures vp "
 					+ ((maXe == null) ?  " where ctx.isActive = 1 " : " where ctx.maXe = :maXe ")
@@ -729,6 +686,7 @@ public class UserUtils {
 			 
 			 Product product = new Product();
 			 product.setCode(objs[0].toString());
+			 context.setAttribute("frontPage", objs[0].toString());
 			 product.setName(objs[1].toString());
 			 product.setDescription(objs[2].toString());
 			 product.setPicture(objs[3].toString());

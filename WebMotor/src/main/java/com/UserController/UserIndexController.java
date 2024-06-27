@@ -22,8 +22,8 @@ public class UserIndexController {
 	public String index(ModelMap model, HttpSession s) throws Exception{
 		model.addAttribute("categoryList", userUtils.getIndexCategory());
 		model.addAttribute("featureList", userUtils.getTop8BestSellerProduct());
-		model.addAttribute("indexProduct", userUtils.getIndexProduct((String)context.getAttribute("frontPage")));
-		model.addAttribute("specialProduct", userUtils.getSpecialProduct((String)context.getAttribute("specialOffer")));
+		model.addAttribute("indexProduct", userUtils.getIndexProduct((String)context.getAttribute("frontPage"), context));
+		model.addAttribute("specialProduct", userUtils.getSpecialProduct((String)context.getAttribute("specialOffer"), context));
 		return "User/index";
 	}
 }

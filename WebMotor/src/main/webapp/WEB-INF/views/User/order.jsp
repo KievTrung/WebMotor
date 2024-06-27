@@ -165,12 +165,12 @@
 	                                <td><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price * item.amount }"/></td>
 	                            </tr>  
 	                            <tr>
-	                                <th colspan="2">SubTotal + <fmt:formatNumber type="percent" value="${donHang.vat}"/> VAT</th>
+	                                <th colspan="2">SubTotal + ${donHang.vat} % VAT</th>
                                 	<th ><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${item.price * item.amount  * (1 + donHang.vat/100)}"/></th>
 	                            </tr>                          
                             </c:forEach>
                             <tr>
-                            	<th colspan="2">Total + <fmt:formatNumber type="percent" value="${donHang.vat}"/> VAT</th>
+                            	<th colspan="2">Total + ${donHang.vat} % VAT</th>
                                 <th><fmt:formatNumber type="CURRENCY" currencySymbol="VND " maxFractionDigits="0" value="${total}"/></th>
                             </tr>
                         </table>

@@ -98,8 +98,18 @@ public class ImportController {
 		//if product in list
 		if(index != -1) {			
 			//if this in edit mode
-			if(session.getAttribute("editMode") != null)
-				rd.addFlashAttribute("msg", "alert('"+ adminUtils.saveProductToList(product, newImages, importList, index) + "')");
+			if(session.getAttribute("editMode") != null) {
+				//double check price
+				if(product.getPrice() == null || product.getPrice() <= 0) {
+					error.rejectValue("price", "2", "Invalid price");
+					return "Admin/Bill/import";
+				}
+				else
+					rd.addFlashAttribute("msg", "alert('"+ adminUtils.saveProductToList(product, newImages, importList, index) + "')");
+			}
+			else
+				rd.addFlashAttribute("msg", "alert('Product already in the list')");
+				
 			
 			return "redirect:/admin/import";
 		}

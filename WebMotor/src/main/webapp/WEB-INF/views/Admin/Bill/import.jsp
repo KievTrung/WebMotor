@@ -148,7 +148,7 @@
 	                    <td class="detail">
 	                        <a  href="editProduct?index=${status.index}">
 	                            <div class="info">
-	                            	<img src="<c:url value="/resources/import/${product.picture}"/>" 
+	                            	<img src="<c:url value="/resources/upload/${product.picture}"/>" 
 	                            		onerror="this.onerror=null;this.src='<c:url value="/resources/vehicles/${product.picture}"/>';"/>
 	                                <div>
 	                                    <table class="meta-info">

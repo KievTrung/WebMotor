@@ -1,6 +1,5 @@
 package com.UserController;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -23,13 +22,17 @@ public class LoginController {
 	
 	@RequestMapping("login")
 	public String login(ModelMap model) {
+		//create new user
 		model.addAttribute("user", new User());
 		model.addAttribute("onLoad", "login()");
 		return "Login/login";
 	}	
 	
 	@RequestMapping(value="login", method=RequestMethod.POST)
-	public String login(ModelMap model, @Valid @ModelAttribute("user")User user, BindingResult errors, HttpServletRequest request){
+	public String login(ModelMap model, 
+						@Valid @ModelAttribute("user")User user, 
+						BindingResult errors, 
+						HttpSession s){
 		if(errors.hasErrors()) {
 			return "Login/login"; 
 		}
@@ -48,16 +51,18 @@ public class LoginController {
 			return "Login/login";
 		}
 		
-		HttpSession s = request.getSession();
 		s.setAttribute("account", account);
 
-		if(account.isAdmin()) 
+		if(account.isAdmin())
 			return "redirect:/admin/index";
 		return "redirect:/index";
 	}
 	
 	@RequestMapping("register")
-	public String register(@Valid @ModelAttribute("user")User user, BindingResult result, ModelMap model, HttpServletRequest request) {
+	public String register(@Valid @ModelAttribute("user")User user, 
+						BindingResult result, 
+						ModelMap model, 
+						HttpSession s) {
 		
 		if(userUtils.getUser(user.getUsername()) == null) 
 		{
@@ -69,17 +74,14 @@ public class LoginController {
 											user.getPassword(), 
 											0, 
 											user.getEmail(),
-											"", false, false) == 0) 
+											"", false, true) == 0) 
 				{
 					model.addAttribute("msgRegister", "Registered fail");
 					model.addAttribute("onLoad", "register()");
 					return "Login/login";
 				}
 				else 
-				{				
-					HttpSession s = request.getSession();
 					s.setAttribute("account", userUtils.getUser(user.getUsername()));
-				}
 			}
 			else
 			{
